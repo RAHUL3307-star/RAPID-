@@ -118,13 +118,13 @@ export default function App() {
   const [view, setView] = useState<View>('landing');
 
   // Sync view with auth state changes (login/logout)
+  // This now reliably fires because user comes from shared AuthContext
   useEffect(() => {
-    if (!loading) {
-      if (user && view !== 'app') {
-        setView('app');
-      } else if (!user && view === 'app') {
-        setView('landing');
-      }
+    if (loading) return;
+    if (user) {
+      setView('app');
+    } else if (!user && view === 'app') {
+      setView('landing');
     }
   }, [loading, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -132,7 +132,7 @@ export default function App() {
     return (
       <div style={{
         minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: '#0A0F1E', fontFamily: 'Outfit,sans-serif',
+        background: '#0A0F1E', fontFamily: "'Playfair Display', serif",
       }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>🌧️</div>
@@ -163,10 +163,20 @@ export default function App() {
     );
   }
 
-  // Guard: if we're in 'app' view but user is null (e.g. after manual signOut race),
-  // redirect to landing without calling setState in render
+  // Guard: if somehow in 'app' view but user is null (race condition), show loader
   if (!user) {
-    return null;
+    return (
+      <div style={{
+        minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: '#0A0F1E', fontFamily: "'Playfair Display', serif",
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>🌧️</div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: '#E2E8F0', marginBottom: 8 }}>RAPID</div>
+          <div style={{ fontSize: 13, color: '#64748B' }}>Loading session…</div>
+        </div>
+      </div>
+    );
   }
 
   return <AppShell user={user} signOut={() => { signOut(); setView('landing'); }} />;

@@ -4,7 +4,7 @@
    Theme: Dark Industrial / IoT Aesthetic
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
   --bg-primary:     #ffffff;
@@ -40,7 +40,7 @@
   --glow-green:     0 4px 14px rgba(13, 148, 136, 0.25);
   --glow-amber:     0 4px 14px rgba(217, 119, 6, 0.25);
   --glow-red:       0 4px 14px rgba(220, 38, 38, 0.25);
-  --font-body:      'Outfit', sans-serif;
+  --font-body:      'Playfair Display', serif;
   --font-mono:      'JetBrains Mono', monospace;
   --space-xs:  4px;
   --space-sm:  8px;
