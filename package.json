@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "tunnel": "npx -y cloudflared tunnel --url http://localhost:5173",
+    "deploy:cloudflare": "npm run build && npx -y wrangler pages deploy dist --project-name rapid-dewatering"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.3",
