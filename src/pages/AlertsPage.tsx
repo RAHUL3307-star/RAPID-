@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAlerts }     from '../hooks/useAlerts';
 import { useSensorData } from '../hooks/useSensorData';
+import { useIsMobile }   from '../hooks/useIsMobile';
 import type { Alert }    from '../types';
 
 /* ─────────────────────────────────────────────────────────────
@@ -103,6 +104,7 @@ const Stat: React.FC<{ count: number; label: string; color: string }> = ({ count
 export const AlertsPage: React.FC = () => {
   const { alerts, acknowledge } = useAlerts();
   const { latest, hardwareMode, bridgeStatus } = useSensorData();
+  const isMobile = useIsMobile();
   const [filter, setFilter]       = useState<'ALL' | 'CRITICAL' | 'WARNING' | 'INFO' | 'UNREAD'>('ALL');
   const [localAlerts, setLocal]   = useState<Alert[]>([]);
   const prevWaterRef              = useRef<number | null>(null);
@@ -313,7 +315,7 @@ export const AlertsPage: React.FC = () => {
         <div style={{ fontSize: 13, fontWeight: 600, color: '#F5F7F2', fontFamily: "'Geist', sans-serif", marginBottom: 14 }}>
           📋 Alert Source Guide
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: 12 }}>
           {[
             { type: 'Water Level', trigger: 'Ultrasonic sensor on ESP32 reads > 50%, 65%, 80%', severity: 'CRITICAL' },
             { type: 'Pump Failure', trigger: 'Water rising despite pump on HIGH SPEED (sensor confirms)', severity: 'CRITICAL' },

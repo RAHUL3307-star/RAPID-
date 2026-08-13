@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useWokwiBridge } from '../hooks/useWokwiBridge';
+import { useIsMobile }    from '../hooks/useIsMobile';
 
 interface ThresholdState {
   waterWarning: number;
@@ -136,6 +137,7 @@ const SettingsInput: React.FC<{
 );
 
 export const Settings: React.FC = () => {
+  const isMobile = useIsMobile();
   const [supabaseUrl, setSupabaseUrl] = useState(import.meta.env.VITE_SUPABASE_URL || '');
   const [supabaseKey, setSupabaseKey] = useState(import.meta.env.VITE_SUPABASE_ANON_KEY || '');
   const [weatherKey,  setWeatherKey]  = useState(import.meta.env.VITE_WEATHER_API_KEY  || '');
@@ -250,7 +252,7 @@ export const Settings: React.FC = () => {
       )}
 
       {/* ── ROW 1: API + HARDWARE ── */}
-      <div style={S.gridRow}>
+      <div style={{ ...S.gridRow, gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr' }}>
 
         {/* API & Cloud Services */}
         <Card>
@@ -415,7 +417,7 @@ export const Settings: React.FC = () => {
       </div>
 
       {/* ── ROW 2: THRESHOLDS + AUTOMATION ── */}
-      <div style={S.gridRow}>
+      <div style={{ ...S.gridRow, gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr' }}>
 
         {/* Alert Thresholds */}
         <Card>

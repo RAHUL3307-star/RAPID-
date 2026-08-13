@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { fetchWeatherData } from '../lib/weatherService';
+import { useIsMobile } from '../hooks/useIsMobile';
 import type { WeatherData } from '../lib/weatherService';
 
 /* ─────────────────────────────────────────────
@@ -148,6 +149,7 @@ export const WeatherPage: React.FC = () => {
   const loc      = weather?.locationName   ?? location;
   const emoji    = conditionEmoji(cond);
   const maxHour  = Math.max(...DEMO_HOURLY.map(h => h.rain));
+  const isMobile = useIsMobile();
 
   return (
     <div style={S.page}>
@@ -288,7 +290,11 @@ export const WeatherPage: React.FC = () => {
           {/* ── 7-Day Forecast ── */}
           <div style={S.card}>
             <div style={S.cardTitle}>7-Day Rainfall Outlook</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 10, marginTop: 8 }}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(7, 1fr)',
+              gap: 10, marginTop: 8
+            }}>
               {DEMO_DAILY.map(d => (
                 <div key={d.day} style={{
                   background: '#0B0D0F', borderRadius: 12, padding: '14px 10px',

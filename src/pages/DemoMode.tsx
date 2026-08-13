@@ -3,6 +3,7 @@ import {
   Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Area, ComposedChart,
 } from 'recharts';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 interface ScenarioStep {
   id:          number;
@@ -106,11 +107,12 @@ export const DemoMode: React.FC = () => {
 
   const activeStep = currentStep >= 0 ? SCENARIO_STEPS[currentStep] : null;
   const hasStarted = currentStep >= 0;
+  const isMobile = useIsMobile();
 
   return (
     <div style={S.root}>
       {/* ── TOP HERO SECTION (Figma layout) ── */}
-      <div style={{ ...S.heroSection, opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.5s ease' }}>
+      <div style={{ ...S.heroSection, gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.5s ease' }}>
 
         {/* Left branding column */}
         <div style={S.heroBranding}>
@@ -342,7 +344,7 @@ export const DemoMode: React.FC = () => {
 
       {/* ── CHART + EVENT LOG (shown after simulation starts) ── */}
       {chartData.length > 1 && (
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr', gap: 20 }}>
 
           {/* Chart panel */}
           <div style={S.chartPanel}>

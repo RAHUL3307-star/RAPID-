@@ -1,18 +1,38 @@
 import { useState, useEffect } from 'react';
 
 /**
- * Returns true when the viewport width is ≤ the given breakpoint (default 600px).
- * Used to apply responsive inline-style overrides in TSX components.
+ * Returns true when the screen is mobile or in portrait mode (<= 900px or portrait orientation).
  */
-export function useIsMobile(breakpoint = 600): boolean {
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= breakpoint);
+export function useIsMobile(breakpoint = 900): boolean {
+  const checkIsMobile = () => {
+    if (typeof window === 'undefined') return false;
+    return (
+      window.innerWidth <= breakpoint ||
+      window.matchMedia('(orientation: portrait) and (max-width: 1024px)').matches
+    );
+  };
+
+  const [isMobile, setIsMobile] = useState(checkIsMobile);
 
   useEffect(() => {
+    const handleResize = () => setIsMobile(checkIsMobile());
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+
     const mq = window.matchMedia(`(max-width: ${breakpoint}px)`);
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mq.addEventListener('change', handler);
-    setIsMobile(mq.matches);
-    return () => mq.removeEventListener('change', handler);
+    const mqPortrait = window.matchMedia('(orientation: portrait)');
+
+    mq.addEventListener?.('change', handleResize);
+    mqPortrait.addEventListener?.('change', handleResize);
+
+    setIsMobile(checkIsMobile());
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+      mq.removeEventListener?.('change', handleResize);
+      mqPortrait.removeEventListener?.('change', handleResize);
+    };
   }, [breakpoint]);
 
   return isMobile;

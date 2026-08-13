@@ -4,6 +4,7 @@ import {
   Tooltip, ResponsiveContainer,
 } from 'recharts';
 import { useSensorData } from '../hooks/useSensorData';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 /* ─────────────────────────────────────────────────────────────
    SolarEnergy Page
@@ -123,6 +124,7 @@ const Tip = ({ active, payload, label }: any) => {
 
 export const SolarEnergy: React.FC = () => {
   const { readings, latest } = useSensorData();
+  const isMobile = useIsMobile();
 
   const solarW    = latest?.solar_power    ?? 0;
   const battPct   = latest?.battery_level  ?? 0;
@@ -182,7 +184,7 @@ export const SolarEnergy: React.FC = () => {
       </div>
 
       {/* ── Top metric cards ── */}
-      <div style={{ display: 'flex', gap: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4,1fr)', gap: 14 }}>
         <MetricCard icon="☀️" label="SOLAR OUTPUT"   value={`${solarW.toFixed(0)} W`}      sub={`${solarPct.toFixed(0)}% of max capacity`} color="#F59E0B" />
         <MetricCard icon="🔋" label="BATTERY LEVEL"  value={`${battPct.toFixed(1)}%`}       sub={`${battWh.toFixed(0)} Wh stored`}          color="#B7F34A" />
         <MetricCard icon="⚡" label="PUMP POWER DRAW" value={`${(pumpPow / 1000).toFixed(2)} kW`} sub={`Mode: ${pumpMode}`}                color="#F97316" />
@@ -190,7 +192,7 @@ export const SolarEnergy: React.FC = () => {
       </div>
 
       {/* ── Middle row ── */}
-      <div style={{ display: 'flex', gap: 16 }}>
+      <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 16 }}>
         {/* Solar ring + battery bar */}
         <div style={{ background: '#15181B', border: '1px solid #22252A', borderRadius: 14, padding: '24px', flex: 1, display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: '#F5F7F2', fontFamily: "'Geist', sans-serif" }}>Solar Panel Output</div>
@@ -284,7 +286,7 @@ export const SolarEnergy: React.FC = () => {
         <div style={{ fontSize: 13, fontWeight: 600, color: '#F5F7F2', fontFamily: "'Geist', sans-serif", marginBottom: 14 }}>
           System Configuration
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: 14 }}>
           {[
             { label: 'Solar Panel Max',       val: `${SOLAR_PANEL_MAX_W} W` },
             { label: 'Battery Capacity',      val: `${BATTERY_CAPACITY_WH} Wh` },

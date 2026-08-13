@@ -626,7 +626,7 @@ body::after {
   .grid-3 { grid-template-columns: 1fr; }
   .page { padding: var(--space-md); }
 }
-@media (max-width: 600px) {
+@media (max-width: 900px), (orientation: portrait) and (max-width: 1024px) {
   /* Grid collapses */
   .grid-6 { grid-template-columns: 1fr !important; }
   .grid-3 { grid-template-columns: 1fr !important; }
@@ -842,7 +842,7 @@ body::after {
    PORTRAIT MOBILE (≤600px) — sidebar becomes a top nav bar
    Uses !important throughout to override Sidebar.tsx inline styles
 ═══════════════════════════════════════════════════════════ */
-@media (max-width: 600px) {
+@media (max-width: 900px), (orientation: portrait) and (max-width: 1024px) {
   /* App shell: vertical stack */
   .app-shell {
     flex-direction: column !important;

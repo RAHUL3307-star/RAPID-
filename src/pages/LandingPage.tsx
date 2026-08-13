@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useIsMobile } from '../hooks/useIsMobile';
 import type { AuthUser } from '../hooks/useAuth';
 
 interface LandingPageProps {
@@ -225,6 +226,7 @@ const SurgeDonut: React.FC<{ pct: number }> = ({ pct }) => {
 export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGetStarted, user, onDashboard }) => {
   const [scrolled, setScrolled]   = useState(false);
   const [heroMounted, setHeroMounted] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     setTimeout(() => setHeroMounted(true), 100);
@@ -304,7 +306,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGetStarted,
           <div style={S.heroGrid} />
         </div>
 
-        <div style={S.heroInner}>
+        <div style={{ ...S.heroInner, gridTemplateColumns: isMobile ? '1fr' : '1fr 1.1fr', gap: isMobile ? 32 : 48 }}>
           {/* ── Left Copy ── */}
           <div style={{
             ...S.heroLeft,
@@ -353,6 +355,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGetStarted,
           {/* ── Right Visual ── */}
           <div style={{
             ...S.heroRight,
+            flexDirection: isMobile ? 'column' : 'row',
+            height: isMobile ? 'auto' : 320,
             opacity: heroMounted ? 1 : 0,
             transform: heroMounted ? 'translateX(0)' : 'translateX(40px)',
             transition: 'all 0.9s cubic-bezier(0.16,1,0.3,1) 0.15s',
@@ -427,7 +431,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGetStarted,
             switches your dewatering pump to the right mode — before the mine floods.
           </p>
 
-          <div style={S.stepsGrid}>
+          <div style={{ ...S.stepsGrid, gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)' }}>
             {[
               { ico: '🌧️', n: 1, title: 'Weather Ingestion', desc: 'WeatherAPI fetches live rainfall, storm probability, and 3-day forecasts for your mine location every 10 minutes.', color: '#63D9FF' },
               { ico: '🧠', n: 2, title: 'AI Risk Analysis',  desc: 'The RAPID AI engine calculates predicted water level rise at +30 min and +60 min using inflow rate and rain probability.', color: '#B7F34A' },
@@ -454,7 +458,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGetStarted,
           <div style={S.eyebrow}>CORE FEATURES</div>
           <h2 style={S.h2}>Everything Your Mine Needs,<br />In One Dashboard</h2>
 
-          <div style={S.featsGrid}>
+          <div style={{ ...S.featsGrid, gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)' }}>
             {[
               { ico: '🌧️', color: '#63D9FF', title: '60-Min Rain Prediction', desc: 'AI forecasts water inflow rate up to 60 minutes ahead using live rainfall data, giving you a critical head start before flooding.' },
               { ico: '💧', color: '#63D9FF', title: 'Real-Time Water Level',   desc: 'Ultrasonic sensor data from ESP32 streams live water level readings to your dashboard every few seconds via Supabase Realtime.' },
@@ -488,7 +492,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGetStarted,
             predicted rainfall, and rate of rise.
           </p>
 
-          <div style={S.modesGrid}>
+          <div style={{ ...S.modesGrid, gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)' }}>
             {[
               { color: '#8B9298', bg: '#22252A',                 tag: 'STANDBY',   name: 'OFF Mode',   desc: 'Normal conditions. No rain risk. Water level stable below threshold.', when: 'Water < 40% · Rain < 30%',     ico: '⚪' },
               { color: '#B7F34A', bg: 'rgba(183,243,74,0.08)',   tag: 'LOW',       name: 'Low Speed',  desc: 'Mild inflow detected. Pump operates at 30% capacity to manage gradual rise.', when: 'Water 40–55% · Rain 30–60%', ico: '🟢' },
@@ -516,7 +520,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGetStarted,
             Every component of RAPID is chosen for reliability, performance, and ease of hackathon deployment.
           </p>
 
-          <div style={S.techGrid}>
+          <div style={{ ...S.techGrid, gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(5, 1fr)' }}>
             {[
               { ico: '🌧️', name: 'WeatherAPI',     desc: '1M free calls/mo · Real-time + 3-day forecast', color: '#63D9FF' },
               { ico: '⚛️',  name: 'React 19',       desc: 'TypeScript · Vite · Hot reload',                color: '#63D9FF' },
@@ -575,7 +579,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGetStarted,
       {/* ══════════════ FOOTER ══════════════ */}
       <footer style={S.footer}>
         <div style={S.footerInner}>
-          <div style={S.footerTop}>
+          <div style={{ ...S.footerTop, gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr 1fr 1fr', gap: isMobile ? 24 : 40 }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                 <div style={S.navLogoMark}>

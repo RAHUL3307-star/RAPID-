@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useSensorData }  from '../hooks/useSensorData';
 import { usePredictions } from '../hooks/usePredictions';
 import { supabase, isDemoMode } from '../lib/supabaseClient';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 /* ─────────────────────────────────────────────────────────────
    PumpControl Page
@@ -161,6 +162,7 @@ export const PumpControl: React.FC = () => {
 
   const riskColor = { LOW: '#B7F34A', MEDIUM: '#F59E0B', HIGH: '#F97316', CRITICAL: '#EF4444' };
   const rc = riskColor[decision?.riskLevel ?? 'LOW'];
+  const isMobile = useIsMobile();
 
   return (
     <div style={S.page}>
@@ -184,7 +186,7 @@ export const PumpControl: React.FC = () => {
       </div>
 
       {/* ── Main row ── */}
-      <div style={S.mainRow}>
+      <div style={{ ...S.mainRow, flexDirection: isMobile ? 'column' : 'row' }}>
         {/* Left: Pump status + controls */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1.5 }}>
 

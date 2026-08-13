@@ -4,6 +4,7 @@ import {
   Tooltip, ResponsiveContainer, AreaChart, Area, ReferenceLine, Cell,
 } from 'recharts';
 import { useSensorData } from '../hooks/useSensorData';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 /* ── Mini sparkline ── */
 const Spark: React.FC<{ values: number[]; color: string }> = ({ values, color }) => {
@@ -126,7 +127,8 @@ const DEMO_ROWS = [
 export const Analytics: React.FC = () => {
   const { readings } = useSensorData();
   const [dateRange, setDateRange] = useState('Last 7 Days');
-  const [station,   setStation]   = useState('KRB-07');
+  const [station, setStation]     = useState('KRB-07');
+  const isMobile = useIsMobile();
 
   // ── Derived data ──
   const data = readings.map((r, i) => {
@@ -156,15 +158,11 @@ export const Analytics: React.FC = () => {
       solar:   r ? r.solar : +(3 + Math.sin(i * 1.2) * 1.2).toFixed(2),
       battery: r ? r.battery : +(65 + Math.sin(i * 0.5) * 8).toFixed(1),
       flow:    r ? r.flow : +(400 + Math.sin(i * 0.9) * 90 + Math.random() * 40).toFixed(0),
+      pump:    r ? +(r.pump * 10).toFixed(0) : +(30 + Math.sin(i * 1.1) * 40).toFixed(0),
     };
   });
 
-  // Pump load distribution (10 batches)
-  const batchData = Array.from({ length: 10 }, (_, i) => {
-    const base = 25 + Math.abs(Math.sin(i * 1.3)) * 55;
-    const load = +base.toFixed(0);
-    return { name: `Batch ${i + 1}`, load, level: load > 65 ? 'critical' : load > 42 ? 'high' : 'normal' };
-  });
+
 
   // Summary stats
   const avgWater   = data.length ? (data.reduce((a, d) => a + d.water,   0) / data.length).toFixed(1) : '3.8';
@@ -231,7 +229,7 @@ export const Analytics: React.FC = () => {
       </div>
 
       {/* ── Stat Cards ── */}
-      <div style={S.statsRow}>
+      <div style={isMobile ? { display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 10 } : S.statsRow}>
         <StatCard label="AVERAGE WATER LEVEL" value={avgWater}   unit="m"   badge="OPTIMAL" badgeColor="#63D9FF" sub="↑ +9.1m vs last week"             sparkValues={wSpark}  sparkColor="#63D9FF" />
         <StatCard label="MAXIMUM WATER LEVEL" value={maxWater}   unit="m"   badge="HIGH"    badgeColor="#EF4444" sub="⚠ Approaching critical threshold" sparkValues={mxSpark} sparkColor="#EF4444" />
         <StatCard label="SOLAR ENERGY"        value={avgSolar}   unit="kWh" badge="ACTIVE"  badgeColor="#F59E0B" sub="☀ 98% battery conversion rate"    sparkValues={sSpark}  sparkColor="#F59E0B" />
@@ -240,7 +238,7 @@ export const Analytics: React.FC = () => {
       </div>
 
       {/* ── Charts Row 1 ── */}
-      <div style={S.chartsGrid}>
+      <div style={isMobile ? { display: 'flex', flexDirection: 'column', gap: 14 } : S.chartsGrid}>
         <ChartCard title="Water Level vs Rainfall" badge="● Water Level (m)  ● Rainfall (mm)" badgeColor="#63D9FF">
           <div style={{ height: 210 }}>
             <ResponsiveContainer width="100%" height="100%">
@@ -275,7 +273,7 @@ export const Analytics: React.FC = () => {
       </div>
 
       {/* ── Charts Row 2 ── */}
-      <div style={S.chartsGrid}>
+      <div style={isMobile ? { display: 'flex', flexDirection: 'column', gap: 14 } : S.chartsGrid}>
         <ChartCard title="Flow Rate Trend (L/s)" badge="● Primary Flow Segment" badgeColor="#63D9FF">
           <div style={{ height: 210 }}>
             <ResponsiveContainer width="100%" height="100%">
@@ -296,21 +294,17 @@ export const Analytics: React.FC = () => {
           </div>
         </ChartCard>
 
-        <ChartCard title="Pump Load Distribution" badge="● Normal  ● High  ● Critical" badgeColor="#B7F34A">
+        <ChartCard title="Pump Load Distribution" badge="● Loading (%)" badgeColor="#B7F34A">
           <div style={{ height: 210 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={batchData} margin={{ ...chartMargin, left: -10 }}>
+              <BarChart data={chartData} margin={{ ...chartMargin, left: -10 }}>
                 <CartesianGrid {...gridStyle} />
-                <XAxis dataKey="name" {...axisProps} tick={{ ...tickStyle, fontSize: 9 }} />
+                <XAxis dataKey="day" {...axisProps} />
                 <YAxis {...axisProps} />
-                <Tooltip
-                  contentStyle={{ background: '#1A1D21', border: '1px solid #22252A', borderRadius: 10, fontFamily: "'Geist', sans-serif" }}
-                  labelStyle={{ color: '#8B9298', fontSize: 10 }}
-                  itemStyle={{ fontSize: 11 }}
-                />
-                <Bar dataKey="load" name="Load" radius={[3, 3, 0, 0]}>
-                  {batchData.map((entry, i) => (
-                    <Cell key={i} fill={entry.level === 'critical' ? '#EF4444' : entry.level === 'high' ? '#F97316' : '#B7F34A'} />
+                <Tooltip content={<Tip />} />
+                <Bar dataKey="pump" name="Load (%)" radius={[4, 4, 0, 0]}>
+                  {chartData.map((d, i) => (
+                    <Cell key={i} fill={+d.pump > 80 ? '#EF4444' : +d.pump > 50 ? '#F59E0B' : '#B7F34A'} />
                   ))}
                 </Bar>
               </BarChart>
