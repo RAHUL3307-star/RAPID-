@@ -1136,9 +1136,7 @@
   .login-card-glass { padding: 24px; }
 }
 
-
-
-/* ── Responsive ── */
+/* ── Tablet (≤900px) ── */
 @media (max-width:900px) {
   .land-hero-inner { grid-template-columns:1fr; }
   .land-hero-right { display:none; }
@@ -1149,14 +1147,53 @@
   .land-tech   { grid-template-columns:repeat(3,1fr); }
   .land-band-grid { grid-template-columns:repeat(2,1fr); }
   .land-h1 { font-size: clamp(40px, 8vw, 64px); letter-spacing: -2px; }
-}
-@media (max-width:600px) {
-  .land-nav-links { display:none; }
-  .land-feats  { grid-template-columns:1fr; }
-  .land-modes  { grid-template-columns:1fr 1fr; }
-  .land-tech   { grid-template-columns:repeat(2,1fr); }
-  .land-steps  { grid-template-columns:1fr; }
-  .land-h1 { font-size: clamp(36px,10vw,52px); letter-spacing:-1.5px; }
-  .land-band-val { font-size: 36px; }
+  .land-hero { padding: 80px clamp(16px,4vw,40px) 50px; }
+  .land-mini-stats { gap: 20px; }
 }
 
+/* ── Portrait Mobile (≤600px) ── */
+@media (max-width:600px) {
+  /* Navbar */
+  .land-nav { height: 58px; padding: 0 16px; }
+  .land-nav-links { display:none; }
+  .land-nav-actions { gap: 6px; }
+  .land-btn-ghost { padding: 7px 12px; font-size: 12px; }
+  .land-btn-primary { padding: 7px 14px; font-size: 12px; }
+
+  /* Hero */
+  .land-hero { padding: 76px 16px 44px; }
+  .land-hero-inner { grid-template-columns:1fr; gap: 28px; }
+  .land-hero-right { display:none; }
+  .land-h1 { font-size: clamp(32px,9vw,48px); letter-spacing:-1.5px; margin-bottom: 16px; }
+  .land-lead { font-size: 15px; margin-bottom: 24px; }
+  .land-ctas { gap: 10px; flex-direction: column; align-items: stretch; }
+  .land-btn-xl { padding: 13px 24px; font-size: 14px; width: 100%; justify-content: center; }
+  .land-mini-stats { gap: 18px; flex-wrap: wrap; }
+  .land-mini-stat-val { font-size: 22px; }
+  .land-badge { font-size: 11px; padding: 6px 13px; }
+
+  /* Stats band */
+  .land-band { padding: 36px 16px; }
+  .land-band-grid { grid-template-columns: repeat(2,1fr); gap: 20px; }
+  .land-band-val { font-size: 36px; letter-spacing: -1px; }
+  .land-band-lbl { font-size: 12px; }
+
+  /* Generic sections */
+  .land-sec { padding: 52px 16px; }
+
+  /* Feature / mode / step grids */
+  .land-feats  { grid-template-columns:1fr; gap: 14px; }
+  .land-modes  { grid-template-columns:1fr; gap: 14px; }
+  .land-tech   { grid-template-columns:repeat(2,1fr); gap: 12px; }
+  .land-steps  { grid-template-columns:1fr; }
+
+  /* Scrolling showcase */
+  .sc-stat-grid-row { grid-template-columns: repeat(2,1fr) !important; }
+}
+
+/* ── Very small phones (≤400px) ── */
+@media (max-width:400px) {
+  .land-h1 { font-size: 30px; }
+  .land-band-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
+  .land-band-val { font-size: 28px; }
+}

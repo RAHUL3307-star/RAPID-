@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 interface LoginPageProps {
   onBack:    () => void;
@@ -24,6 +25,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBack, onSuccess }) => {
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotSubmitted, setForgotSubmitted] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     setTimeout(() => setMounted(true), 50);
@@ -77,77 +79,95 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBack, onSuccess }) => {
   };
 
   return (
-    <div style={styles.root}>
-      {/* ── LEFT BRANDED PANEL ── */}
-      <div style={styles.leftPanel}>
-        {/* Background glow orbs */}
-        <div style={{ ...styles.glowOrb, ...styles.glowLime }} />
-        <div style={{ ...styles.glowOrb, ...styles.glowCyan }} />
+    <div className="login-page-container" style={{
+      ...styles.root,
+      ...(isMobile ? { flexDirection: 'column', height: 'auto', minHeight: '100vh', overflowY: 'auto' } : {})
+    }}>
+      {/* ── LEFT BRANDED PANEL (hidden on mobile portrait for clean form view) ── */}
+      {!isMobile && (
+        <div className="login-left-panel" style={styles.leftPanel}>
+          {/* Background glow orbs */}
+          <div style={{ ...styles.glowOrb, ...styles.glowLime }} />
+          <div style={{ ...styles.glowOrb, ...styles.glowCyan }} />
 
-        {/* Top: Logo + tagline */}
-        <div style={styles.brandingTop}>
-          <div style={styles.logoRow}>
-            <div style={styles.logoMark}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="#0B0D0F" strokeWidth="0" />
-              </svg>
+          {/* Top: Logo + tagline */}
+          <div style={styles.brandingTop}>
+            <div style={styles.logoRow}>
+              <div style={styles.logoMark}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="#0B0D0F" strokeWidth="0" />
+                </svg>
+              </div>
+              <span style={styles.logoText}>RAPID</span>
             </div>
-            <span style={styles.logoText}>RAPID</span>
-          </div>
-          <div style={styles.tagline}>BUILD FASTER. MOVE FURTHER.</div>
-        </div>
-
-        {/* Center: Hero text + mini card */}
-        <div style={styles.brandingCenter}>
-          <div style={styles.heroTextBlock}>
-            <h1 style={styles.heroHeadline}>
-              Everything you need to move at RAPID speed.
-            </h1>
-            <p style={styles.heroCopy}>
-              Real-time telemetry, predictive rainfall risk modeling, and autonomous multi-stage pump scheduling to prevent pit submergence.
-            </p>
+            <div style={styles.tagline}>BUILD FASTER. MOVE FURTHER.</div>
           </div>
 
-          {/* Mini dashboard card */}
-          <div style={styles.miniCard}>
-            <div style={styles.miniCardHeader}>
-              <div style={styles.miniCardLeft}>
-                <div style={styles.activeDot} />
-                <span style={styles.miniCardLabel}>rapid-api-prod</span>
-              </div>
-              <div style={styles.speedBadge}>Speed 100%</div>
+          {/* Center: Hero text + mini card */}
+          <div className="login-branding-center" style={styles.brandingCenter}>
+            <div style={styles.heroTextBlock}>
+              <h1 className="login-hero-headline" style={styles.heroHeadline}>
+                Everything you need to move at RAPID speed.
+              </h1>
+              <p className="login-hero-copy" style={styles.heroCopy}>
+                Real-time telemetry, predictive rainfall risk modeling, and autonomous multi-stage pump scheduling to prevent pit submergence.
+              </p>
             </div>
-            <div style={styles.metricsRow}>
-              <div style={styles.metricBox}>
-                <div style={styles.metricBoxLabel}>PIT WATER LEVEL</div>
-                <div style={styles.metricBoxValue}>4.85<span style={styles.metricUnit}>m</span></div>
+
+            {/* Mini dashboard card */}
+            <div className="login-mini-card" style={styles.miniCard}>
+              <div style={styles.miniCardHeader}>
+                <div style={styles.miniCardLeft}>
+                  <div style={styles.activeDot} />
+                  <span style={styles.miniCardLabel}>rapid-api-prod</span>
+                </div>
+                <div style={styles.speedBadge}>Speed 100%</div>
               </div>
-              <div style={styles.metricBox}>
-                <div style={styles.metricBoxLabel}>ACTIVE PUMPS</div>
-                <div style={styles.metricBoxValue}>3<span style={styles.metricUnit}>/4</span></div>
+              <div style={styles.metricsRow}>
+                <div style={styles.metricBox}>
+                  <div style={styles.metricBoxLabel}>PIT WATER LEVEL</div>
+                  <div style={styles.metricBoxValue}>4.85<span style={styles.metricUnit}>m</span></div>
+                </div>
+                <div style={styles.metricBox}>
+                  <div style={styles.metricBoxLabel}>ACTIVE PUMPS</div>
+                  <div style={styles.metricBoxValue}>3<span style={styles.metricUnit}>/4</span></div>
+                </div>
+                <div style={styles.metricBox}>
+                  <div style={styles.metricBoxLabel}>AI RISK</div>
+                  <div style={{ ...styles.metricBoxValue, color: '#B7F34A' }}>LOW</div>
+                </div>
               </div>
-              <div style={styles.metricBox}>
-                <div style={styles.metricBoxLabel}>AI RISK</div>
-                <div style={{ ...styles.metricBoxValue, color: '#B7F34A' }}>LOW</div>
+              <div style={styles.codeRow}>
+                <span style={styles.codeText}>$ rapid deploy --flood-defense</span>
+                <span style={{ ...styles.codeText, color: '#B7F34A', marginLeft: 8 }}>live in 12ms →</span>
               </div>
-            </div>
-            <div style={styles.codeRow}>
-              <span style={styles.codeText}>$ rapid deploy --flood-defense</span>
-              <span style={{ ...styles.codeText, color: '#B7F34A', marginLeft: 8 }}>live in 12ms →</span>
             </div>
           </div>
-        </div>
 
-        {/* Bottom: Status */}
-        <div style={styles.brandingBottom}>
-          <div style={styles.statusDot} />
-          <span style={styles.statusLabel}>ALL SYSTEMS OPERATIONAL</span>
+          {/* Bottom: Status */}
+          <div style={styles.brandingBottom}>
+            <div style={styles.statusDot} />
+            <span style={styles.statusLabel}>ALL SYSTEMS OPERATIONAL</span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── RIGHT AUTH PANEL ── */}
-      <div style={styles.rightPanel}>
-        <div style={{ ...styles.authCard, opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(24px)', transition: 'all 0.5s cubic-bezier(0.16,1,0.3,1)' }}>
+      <div className="login-right-panel" style={{
+        ...styles.rightPanel,
+        ...(isMobile ? { width: '100%', minHeight: '100vh', padding: '32px 20px 48px' } : {})
+      }}>
+        <div className="login-auth-card" style={{ ...styles.authCard, opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(24px)', transition: 'all 0.5s cubic-bezier(0.16,1,0.3,1)' }}>
+          {isMobile && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <div style={styles.logoMark}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="#0B0D0F" strokeWidth="0" />
+                </svg>
+              </div>
+              <span style={styles.logoText}>RAPID</span>
+            </div>
+          )}
 
           {/* Back link */}
           <button onClick={onBack} style={styles.backBtn} type="button">

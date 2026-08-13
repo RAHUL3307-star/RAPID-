@@ -35,24 +35,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activePage, onNavigate, alertCount, user, onSignOut,
 }) => {
   return (
-    <nav style={S.sidebar}>
+    <nav className="sidebar-root" style={S.sidebar}>
       {/* ── Logo ── */}
-      <div style={S.logo}>
+      <div className="sidebar-logo-container" style={S.logo}>
         <div style={S.logoMark}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="#0B0D0F" />
           </svg>
         </div>
-        <div>
+        <div className="sidebar-logo-details">
           <div style={S.logoText}>RAPID</div>
           <div style={S.logoSub}>WATER COMMAND</div>
         </div>
       </div>
 
-      <div style={S.divider} />
+      <div className="sidebar-divider" style={S.divider} />
 
       {/* ── Nav items ── */}
-      <div style={S.navList}>
+      <div className="sidebar-nav-list" style={S.navList}>
         {NAV_ITEMS.map(item => {
           const isActive = activePage === item.id;
           const Icon     = item.icon;
@@ -63,6 +63,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               id={`nav-${item.id}`}
               onClick={() => onNavigate(item.id)}
               aria-current={isActive ? 'page' : undefined}
+              className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
               style={{
                 ...S.navItem,
                 background: isActive ? 'rgba(183,243,74,0.12)' : 'transparent',
@@ -85,7 +86,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span style={{ color: isActive ? '#B7F34A' : '#8B9298', display: 'flex', flexShrink: 0 }}>
                 <Icon />
               </span>
-              <span style={S.navLabel}>{item.label}</span>
+              <span className="sidebar-nav-label" style={S.navLabel}>{item.label}</span>
               {item.badge && alertCount > 0 && (
                 <span style={S.alertBadge}>{alertCount}</span>
               )}
@@ -95,13 +96,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* ── Footer / User ── */}
-      <div style={S.footer}>
+      <div className="sidebar-footer" style={S.footer}>
         {user && (
-          <div style={S.userCard}>
+          <div className="sidebar-user-card" style={S.userCard}>
             <div style={S.userAvatar}>
               {user.name?.charAt(0).toUpperCase() || 'U'}
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="sidebar-user-info" style={{ flex: 1, minWidth: 0 }}>
               <div style={S.userName}>{user.name || 'Analyst'}</div>
               <div style={S.userRole}>
                 {user.email?.split('@')[0] || 'DR-CONSOLE-09'}

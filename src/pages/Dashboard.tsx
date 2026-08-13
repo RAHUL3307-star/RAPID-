@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSensorData }  from '../hooks/useSensorData';
 import { useAlerts }      from '../hooks/useAlerts';
 import { usePredictions } from '../hooks/usePredictions';
+import { useIsMobile }    from '../hooks/useIsMobile';
 import { useWeather }     from '../hooks/useWeather';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
@@ -147,6 +148,7 @@ export const Dashboard: React.FC = () => {
   const { weather: liveWeather }      = useWeather();
   const [mounted, setMounted]         = useState(false);
   const [now, setNow]                 = useState(new Date());
+  const isMobile                      = useIsMobile();
 
   useEffect(() => {
     if (!loading && latest) setTimeout(() => setMounted(true), 80);
@@ -221,33 +223,38 @@ export const Dashboard: React.FC = () => {
     }}>
 
       {/* ── Top Status Bar ── */}
-      <div style={S.statusBar}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={S.systemDot} />
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#B7F34A', fontFamily: "'Geist', sans-serif", letterSpacing: '0.06em' }}>
-            SYSTEM OPERATIONAL
-          </span>
-          <span style={S.statusSep}>·</span>
-          <span style={{ fontSize: 12, color: '#8B9298', fontFamily: "'Geist', sans-serif" }}>
-            Kelantan River Basin — Station KRB-07
-          </span>
+      {!isMobile && (
+        <div style={S.statusBar}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={S.systemDot} />
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#B7F34A', fontFamily: "'Geist', sans-serif", letterSpacing: '0.06em' }}>
+              SYSTEM OPERATIONAL
+            </span>
+            <span style={S.statusSep}>·</span>
+            <span style={{ fontSize: 12, color: '#8B9298', fontFamily: "'Geist', sans-serif" }}>
+              Kelantan River Basin — Station KRB-07
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <span style={{ fontSize: 11, color: '#8B9298', fontFamily: "'Geist Mono', monospace" }}>
+              LIVE: {now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, ' ')} {now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })} UTC
+            </span>
+            <button style={S.bellBtn} onClick={() => {}}>
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="#8B9298" strokeWidth="1.8" strokeLinecap="round"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="#8B9298" strokeWidth="1.8" strokeLinecap="round"/>
+              </svg>
+              {unack > 0 && <span style={S.bellBadge}>{unack}</span>}
+            </button>
+          </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <span style={{ fontSize: 11, color: '#8B9298', fontFamily: "'Geist Mono', monospace" }}>
-            LIVE: {now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, ' ')} {now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })} UTC
-          </span>
-          <button style={S.bellBtn} onClick={() => {}}>
-            <svg width="15" height="15" fill="none" viewBox="0 0 24 24">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="#8B9298" strokeWidth="1.8" strokeLinecap="round"/>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="#8B9298" strokeWidth="1.8" strokeLinecap="round"/>
-            </svg>
-            {unack > 0 && <span style={S.bellBadge}>{unack}</span>}
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* ── KPI Row ── */}
-      <div style={S.kpiRow}>
+      <div style={isMobile
+        ? { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: '0 12px' }
+        : S.kpiRow
+      }>
         <KPI
           label="WATER LEVEL" value={wl} unit="m"
           icon={<svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M12 2c0 0-7 7-7 13a7 7 0 0 0 14 0c0-6-7-13-7-13z" stroke="#63D9FF" strokeWidth="1.8"/></svg>}
@@ -275,7 +282,10 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* ── Main Row ── */}
-      <div style={S.mainRow}>
+      <div style={isMobile
+        ? { display: 'flex', flexDirection: 'column', gap: 12, padding: '0 12px' }
+        : S.mainRow
+      }>
         {/* Water Level Trend */}
         <Card
           title="WATER LEVEL TREND (24H)" icon="📈"
@@ -372,7 +382,10 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* ── Middle Row ── */}
-      <div style={S.middleRow}>
+      <div style={isMobile
+        ? { display: 'flex', flexDirection: 'column', gap: 12, padding: '0 12px' }
+        : S.middleRow
+      }>
         {/* Pump Control Matrix */}
         <Card title="PUMP CONTROL MATRIX" icon="⚙️" titleRight={<button style={S.cogBtn}><Cog /></button>}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -450,7 +463,10 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* ── Bottom Row ── */}
-      <div style={S.bottomRow}>
+      <div style={isMobile
+        ? { display: 'flex', flexDirection: 'column', gap: 12, padding: '0 12px 20px' }
+        : S.bottomRow
+      }>
         {/* Active Severity Alerts */}
         <Card title="ACTIVE SEVERITY ALERTS" icon="🔔" titleRight={<button style={S.cogBtn}><Cog /></button>} style={{ flex: 1 }}>
           {alerts.filter(a => !a.acknowledged).slice(0, 3).map((a, i) => (
