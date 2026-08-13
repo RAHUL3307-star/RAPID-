@@ -16,10 +16,10 @@ type View    = 'landing' | 'login' | 'app';
 type AppPage = 'dashboard' | 'analytics' | 'demo' | 'settings';
 
 const PAGE_TITLES: Record<AppPage, { title: string; subtitle: string }> = {
-  dashboard: { title: '⚡ RAPID — Operations Dashboard', subtitle: 'Rainfall Analysis & Pump Intelligence for Dewatering · Real-time telemetry · AI prediction' },
-  analytics:  { title: '📊 Analytics & History',          subtitle: 'Historical trends and energy analysis' },
-  demo:       { title: '🎭 Demo Mode',                     subtitle: 'Simulate heavy rainfall scenario for judges' },
-  settings:   { title: '⚙️ System Settings',               subtitle: 'Configure API keys and alert thresholds' },
+  dashboard: { title: 'RAPID — Operations Dashboard', subtitle: 'Rainfall Analysis & Pump Intelligence for Dewatering · Real-time telemetry · AI prediction' },
+  analytics:  { title: 'Analytics & History',          subtitle: 'Historical trends and energy analysis' },
+  demo:       { title: 'Demo Mode',                     subtitle: 'Simulate heavy rainfall scenario for judges' },
+  settings:   { title: 'System Settings',               subtitle: 'Configure API keys and alert thresholds' },
 };
 
 function AppShell({ user, signOut }: { user: NonNullable<ReturnType<typeof useAuth>['user']>; signOut: () => void }) {
@@ -99,7 +99,7 @@ function AppShell({ user, signOut }: { user: NonNullable<ReturnType<typeof useAu
               onClick={() => setPage('dashboard')}
               aria-label={`${unacknowledged} unacknowledged alerts`}
             >
-              🔔
+              <span style={{ fontSize: 16 }}>Alerts</span>
               {unacknowledged > 0 && (
                 <span className="alert-count">{unacknowledged}</span>
               )}
@@ -135,7 +135,6 @@ export default function App() {
         background: '#0A0F1E', fontFamily: "'Playfair Display', serif",
       }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>🌧️</div>
           <div style={{ fontSize: 22, fontWeight: 800, color: '#E2E8F0', marginBottom: 8 }}>RAPID</div>
           <div style={{ fontSize: 13, color: '#64748B' }}>Loading system…</div>
         </div>

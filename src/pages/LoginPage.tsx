@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
-import { useAuth, DEMO_PRESETS } from '../hooks/useAuth';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../hooks/useAuth';
 
 interface LoginPageProps {
   onBack:    () => void;
   onSuccess: () => void;
 }
+
+
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onBack, onSuccess }) => {
   const { signIn, signUp, signInAsDemo } = useAuth();
@@ -21,8 +23,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBack, onSuccess }) => {
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotSubmitted, setForgotSubmitted] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  // Compute password strength for sign up mode
+  useEffect(() => {
+    setTimeout(() => setMounted(true), 50);
+  }, []);
+
   const getPasswordStrength = (pass: string) => {
     if (!pass) return { score: 0, label: '', color: 'transparent' };
     if (pass.length < 6) return { score: 1, label: 'Weak (min 6 chars)', color: '#EF4444' };
@@ -32,18 +38,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBack, onSuccess }) => {
     if (/[^A-Za-z0-9]/.test(pass)) score++;
     if (score <= 2) return { score: 2, label: 'Fair', color: '#F59E0B' };
     if (score === 3 || score === 4) return { score: 3, label: 'Good', color: '#10B981' };
-    return { score: 4, label: 'Strong (Enterprise Grade)', color: '#00C8FF' };
+    return { score: 4, label: 'Strong', color: '#B7F34A' };
   };
 
   const strength = getPasswordStrength(password);
 
-  const fillDemoPreset = (presetKey: 'engineer' | 'manager' | 'operator') => {
-    const preset = DEMO_PRESETS[presetKey];
-    setEmail(preset.email);
-    setPassword('rapid2026');
-    setError('');
-    setSuccessMsg(`Autofilled credentials for ${preset.name}`);
-  };
+
 
   const handleInstantDemoLogin = (presetKey: 'engineer' | 'manager' | 'operator' = 'engineer') => {
     signInAsDemo(presetKey);
@@ -55,26 +55,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBack, onSuccess }) => {
     setError('');
     setSuccessMsg('');
     setLoading(true);
-
     if (mode === 'login') {
       const result = await signIn(email, password);
       setLoading(false);
-      if (result.error) {
-        setError(result.error);
-      } else {
-        onSuccess();
-      }
+      if (result.error) setError(result.error);
+      else onSuccess();
     } else if (mode === 'signup') {
       const result = await signUp(email, password, name, role);
       setLoading(false);
-      if (result.error) {
-        setError(result.error);
-      } else if (result.requiresConfirmation) {
-        setSuccessMsg('Account created successfully! Please check your email to confirm registration.');
+      if (result.error) setError(result.error);
+      else if (result.requiresConfirmation) {
+        setSuccessMsg('Account created! Check your email to confirm.');
         setMode('login');
-      } else {
-        onSuccess();
-      }
+      } else onSuccess();
     }
   };
 
@@ -84,458 +77,892 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBack, onSuccess }) => {
   };
 
   return (
-    <div className="login-page-root">
-      {/* Dynamic Background Glow Blobs */}
-      <div className="login-bg-grid" />
-      <div className="login-glow-blob login-glow-1" />
-      <div className="login-glow-blob login-glow-2" />
-      <div className="login-glow-blob login-glow-3" />
+    <div style={styles.root}>
+      {/* ── LEFT BRANDED PANEL ── */}
+      <div style={styles.leftPanel}>
+        {/* Background glow orbs */}
+        <div style={{ ...styles.glowOrb, ...styles.glowLime }} />
+        <div style={{ ...styles.glowOrb, ...styles.glowCyan }} />
 
-      <div className="login-container">
-        {/* LEFT PANEL: Stitch Enterprise Hero & Telemetry Teaser */}
-        <div className="login-left-panel">
-          <div className="login-brand-header">
-            <div className="login-brand-logo">
-              <span className="login-logo-spark">⚡</span>
+        {/* Top: Logo + tagline */}
+        <div style={styles.brandingTop}>
+          <div style={styles.logoRow}>
+            <div style={styles.logoMark}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="#0B0D0F" strokeWidth="0" />
+              </svg>
             </div>
-            <div>
-              <div className="login-brand-name">RAPID</div>
-              <div className="login-brand-tagline">Dewatring OS · SIH 2026</div>
-            </div>
+            <span style={styles.logoText}>RAPID</span>
           </div>
+          <div style={styles.tagline}>BUILD FASTER. MOVE FURTHER.</div>
+        </div>
 
-          <div className="login-hero-content">
-            <div className="login-badge-pill">
-              <span className="login-badge-dot" />
-              AI-Powered Open Cast Mine Dewatering System
-            </div>
-
-            <h1 className="login-hero-title">
-              Precision Flood Defense & Pump Intelligence
+        {/* Center: Hero text + mini card */}
+        <div style={styles.brandingCenter}>
+          <div style={styles.heroTextBlock}>
+            <h1 style={styles.heroHeadline}>
+              Everything you need to move at RAPID speed.
             </h1>
-
-            <p className="login-hero-desc">
+            <p style={styles.heroCopy}>
               Real-time telemetry, predictive rainfall risk modeling, and autonomous multi-stage pump scheduling to prevent pit submergence.
             </p>
           </div>
 
-          {/* Live Telemetry Card Teaser */}
-          <div className="login-telemetry-card">
-            <div className="login-telemetry-head">
-              <div className="login-telemetry-title">
-                <span>📡</span> Live Sump Telemetry
+          {/* Mini dashboard card */}
+          <div style={styles.miniCard}>
+            <div style={styles.miniCardHeader}>
+              <div style={styles.miniCardLeft}>
+                <div style={styles.activeDot} />
+                <span style={styles.miniCardLabel}>rapid-api-prod</span>
               </div>
-              <div className="login-telemetry-status">
-                <span className="live-pulse" /> ESP32 ONLINE
+              <div style={styles.speedBadge}>Speed 100%</div>
+            </div>
+            <div style={styles.metricsRow}>
+              <div style={styles.metricBox}>
+                <div style={styles.metricBoxLabel}>PIT WATER LEVEL</div>
+                <div style={styles.metricBoxValue}>4.85<span style={styles.metricUnit}>m</span></div>
+              </div>
+              <div style={styles.metricBox}>
+                <div style={styles.metricBoxLabel}>ACTIVE PUMPS</div>
+                <div style={styles.metricBoxValue}>3<span style={styles.metricUnit}>/4</span></div>
+              </div>
+              <div style={styles.metricBox}>
+                <div style={styles.metricBoxLabel}>AI RISK</div>
+                <div style={{ ...styles.metricBoxValue, color: '#B7F34A' }}>LOW</div>
               </div>
             </div>
-
-            <div className="login-telemetry-grid">
-              <div className="login-telemetry-metric">
-                <div className="metric-label">PIT WATER LEVEL</div>
-                <div className="metric-val">4.85 <span className="metric-unit">m</span></div>
-                <div className="metric-bar-wrap">
-                  <div className="metric-bar-fill" style={{ width: '42%', background: '#00C8FF' }} />
-                </div>
-              </div>
-
-              <div className="login-telemetry-metric">
-                <div className="metric-label">ACTIVE PUMPS</div>
-                <div className="metric-val">3 <span className="metric-unit">/ 4</span></div>
-                <div className="metric-bar-wrap">
-                  <div className="metric-bar-fill" style={{ width: '75%', background: '#00FF88' }} />
-                </div>
-              </div>
-
-              <div className="login-telemetry-metric">
-                <div className="metric-label">AI RISK INDEX</div>
-                <div className="metric-val" style={{ color: '#00FF88' }}>LOW <span className="metric-unit">18%</span></div>
-                <div className="metric-bar-wrap">
-                  <div className="metric-bar-fill" style={{ width: '18%', background: '#00FF88' }} />
-                </div>
-              </div>
-
-              <div className="login-telemetry-metric">
-                <div className="metric-label">FLOW RATE</div>
-                <div className="metric-val">1,420 <span className="metric-unit">L/m</span></div>
-                <div className="metric-bar-wrap">
-                  <div className="metric-bar-fill" style={{ width: '65%', background: '#A855F7' }} />
-                </div>
-              </div>
+            <div style={styles.codeRow}>
+              <span style={styles.codeText}>$ rapid deploy --flood-defense</span>
+              <span style={{ ...styles.codeText, color: '#B7F34A', marginLeft: 8 }}>live in 12ms →</span>
             </div>
-          </div>
-
-          {/* Key Feature List */}
-          <div className="login-features-list">
-            <div className="feature-item">
-              <div className="feature-icon">🤖</div>
-              <div>
-                <div className="feature-title">Predictive AI Risk Engine</div>
-                <div className="feature-sub">Early warning flood forecasting based on live weather API</div>
-              </div>
-            </div>
-            <div className="feature-item">
-              <div className="feature-icon">⚡</div>
-              <div>
-                <div className="feature-title">Autonomous Dewatering Control</div>
-                <div className="feature-sub">Dynamic pump staging to optimize peak energy consumption</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Footer Security Badges */}
-          <div className="login-left-footer">
-            <span className="sec-tag">🔒 ISO 27001 Security</span>
-            <span className="sec-tag">🟢 AP-South-1 Server</span>
-            <span className="sec-tag">⚡ 12ms Telemetry Sync</span>
           </div>
         </div>
 
-        {/* RIGHT PANEL: Stitch Glassmorphic Auth Form */}
-        <div className="login-right-panel">
-          <div className="login-card-glass">
+        {/* Bottom: Status */}
+        <div style={styles.brandingBottom}>
+          <div style={styles.statusDot} />
+          <span style={styles.statusLabel}>ALL SYSTEMS OPERATIONAL</span>
+        </div>
+      </div>
 
-            {/* Back Button */}
-            <button className="login-back-link" onClick={onBack} type="button">
-              ← Return to Main Page
-            </button>
+      {/* ── RIGHT AUTH PANEL ── */}
+      <div style={styles.rightPanel}>
+        <div style={{ ...styles.authCard, opacity: mounted ? 1 : 0, transform: mounted ? 'translateY(0)' : 'translateY(24px)', transition: 'all 0.5s cubic-bezier(0.16,1,0.3,1)' }}>
 
-            <div className="login-card-header">
-              <h2 className="login-card-title">
-                {mode === 'login' && 'Welcome Back'}
-                {mode === 'signup' && 'Create Operator Account'}
-                {mode === 'demo' && 'Quick Demo Sign-In'}
-              </h2>
-              <p className="login-card-subtitle">
-                {mode === 'login' && 'Enter your operational credentials to access the RAPID portal.'}
-                {mode === 'signup' && 'Register your mining site profile for telemetry access.'}
-                {mode === 'demo' && 'Select a pre-configured role profile to explore without password.'}
-              </p>
-            </div>
+          {/* Back link */}
+          <button onClick={onBack} style={styles.backBtn} type="button">
+            ← Return to main page
+          </button>
 
-            {/* Navigation Tabs */}
-            <div className="login-mode-tabs">
+          {/* Header */}
+          <div style={styles.authHeader}>
+            <h2 style={styles.authTitle}>
+              {mode === 'login' && 'Welcome back.'}
+              {mode === 'signup' && 'Create your account.'}
+              {mode === 'demo' && 'Try RAPID instantly.'}
+            </h2>
+            <p style={styles.authSubtitle}>
+              {mode === 'login' && 'Sign in to continue to your RAPID workspace.'}
+              {mode === 'signup' && 'Register your mining site profile for telemetry access.'}
+              {mode === 'demo' && 'No account needed. Explore the full experience.'}
+            </p>
+          </div>
+
+          {/* Tab bar */}
+          <div style={styles.tabBar}>
+            {(['login', 'signup', 'demo'] as const).map((t) => (
               <button
-                className={`mode-tab ${mode === 'login' ? 'active' : ''}`}
-                onClick={() => { setMode('login'); setError(''); setSuccessMsg(''); }}
+                key={t}
                 type="button"
+                style={{ ...styles.tab, ...(mode === t ? styles.tabActive : {}) }}
+                onClick={() => { setMode(t); setError(''); setSuccessMsg(''); }}
               >
-                Sign In
+                {t === 'login' ? 'LOG IN' : t === 'signup' ? 'CREATE ACCOUNT' : 'DEMO'}
+                {mode === t && <div style={styles.tabUnderline} />}
               </button>
-              <button
-                className={`mode-tab ${mode === 'signup' ? 'active' : ''}`}
-                onClick={() => { setMode('signup'); setError(''); setSuccessMsg(''); }}
-                type="button"
-              >
-                Sign Up
-              </button>
-              <button
-                className={`mode-tab ${mode === 'demo' ? 'active' : ''}`}
-                onClick={() => { setMode('demo'); setError(''); setSuccessMsg(''); }}
-                type="button"
-              >
-                🎭 Quick Demo
-              </button>
-            </div>
+            ))}
+          </div>
 
-            {/* Quick Demo Autofill Pills (Show on Sign In Mode) */}
-            {mode === 'login' && (
-              <div className="login-presets-wrapper">
-                <div className="presets-label">QUICK ROLE AUTOFILL:</div>
-                <div className="presets-grid">
-                  <button
-                    type="button"
-                    className="preset-pill"
-                    onClick={() => fillDemoPreset('engineer')}
-                  >
-                    ⚡ Engineer
-                  </button>
-                  <button
-                    type="button"
-                    className="preset-pill"
-                    onClick={() => fillDemoPreset('manager')}
-                  >
-                    👷 Manager
-                  </button>
-                  <button
-                    type="button"
-                    className="preset-pill"
-                    onClick={() => fillDemoPreset('operator')}
-                  >
-                    📊 Operator
-                  </button>
-                </div>
+          {/* Error */}
+          {error && (
+            <div style={styles.alertDanger}>
+              <span>⚠️</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 600, marginBottom: 2 }}>Authentication Error</div>
+                <div style={{ opacity: 0.85 }}>{error}</div>
               </div>
-            )}
-
-            {/* Error Notification Banner */}
-            {error && (
-              <div className="login-alert-banner alert-danger">
-                <div className="alert-icon">⚠️</div>
-                <div className="alert-content">
-                  <div className="alert-title">Authentication Error</div>
-                  <div className="alert-text">{error}</div>
-                </div>
-                <button
-                  type="button"
-                  className="alert-fallback-btn"
-                  onClick={() => handleInstantDemoLogin('engineer')}
-                >
-                  ⚡ Skip & Enter Demo
-                </button>
-              </div>
-            )}
-
-            {/* Success Notification Banner */}
-            {successMsg && (
-              <div className="login-alert-banner alert-success">
-                <div className="alert-icon">✅</div>
-                <div className="alert-content">
-                  <div className="alert-text">{successMsg}</div>
-                </div>
-              </div>
-            )}
-
-            {/* DEMO MODE Direct Role Selector Card */}
-            {mode === 'demo' ? (
-              <div className="demo-profiles-container">
-                <div className="demo-profile-card" onClick={() => handleInstantDemoLogin('engineer')}>
-                  <div className="demo-avatar">⚡</div>
-                  <div className="demo-info">
-                    <div className="demo-name">Lead Dewatering Engineer</div>
-                    <div className="demo-email">demo@rapid.com</div>
-                    <div className="demo-desc">Full access to AI predictions, pump manual overrides & IoT settings.</div>
-                  </div>
-                  <button className="demo-launch-btn">Launch →</button>
-                </div>
-
-                <div className="demo-profile-card" onClick={() => handleInstantDemoLogin('manager')}>
-                  <div className="demo-avatar">👷</div>
-                  <div className="demo-info">
-                    <div className="demo-name">Mine Operations Manager</div>
-                    <div className="demo-email">manager@rapid.com</div>
-                    <div className="demo-desc">Executive dashboard view, safety compliance reports & cost analytics.</div>
-                  </div>
-                  <button className="demo-launch-btn">Launch →</button>
-                </div>
-
-                <div className="demo-profile-card" onClick={() => handleInstantDemoLogin('operator')}>
-                  <div className="demo-avatar">📊</div>
-                  <div className="demo-info">
-                    <div className="demo-name">Control Room Operator</div>
-                    <div className="demo-email">operator@rapid.com</div>
-                    <div className="demo-desc">Live alert monitoring, pump status telemetry & emergency ack.</div>
-                  </div>
-                  <button className="demo-launch-btn">Launch →</button>
-                </div>
-              </div>
-            ) : (
-              /* FORM: Sign In or Sign Up */
-              <form onSubmit={handleSubmit} className="login-form">
-                {mode === 'signup' && (
-                  <>
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="input-name">Full Name</label>
-                      <div className="input-wrapper">
-                        <span className="input-icon">👤</span>
-                        <input
-                          id="input-name"
-                          type="text"
-                          className="form-input"
-                          placeholder="e.g. Dr. Rajesh Kumar"
-                          value={name}
-                          onChange={e => setName(e.target.value)}
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="select-role">Mining Designation / Role</label>
-                      <div className="input-wrapper">
-                        <span className="input-icon">🛡️</span>
-                        <select
-                          id="select-role"
-                          className="form-input form-select"
-                          value={role}
-                          onChange={e => setRole(e.target.value)}
-                        >
-                          <option value="Dewatering Engineer">Dewatering Engineer</option>
-                          <option value="Mine Operations Manager">Mine Operations Manager</option>
-                          <option value="Control Room Operator">Control Room Operator</option>
-                          <option value="Mine Safety Officer">Mine Safety Officer</option>
-                          <option value="System Administrator">System Administrator</option>
-                        </select>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                <div className="form-group">
-                  <label className="form-label" htmlFor="input-email">Corporate Email Address</label>
-                  <div className="input-wrapper">
-                    <span className="input-icon">✉️</span>
-                    <input
-                      id="input-email"
-                      type="email"
-                      className="form-input"
-                      placeholder="engineer@rapid.com"
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <div className="label-flex">
-                    <label className="form-label" htmlFor="input-password">Account Password</label>
-                    {mode === 'login' && (
-                      <button
-                        type="button"
-                        className="forgot-link"
-                        onClick={() => { setShowForgotModal(true); setForgotSubmitted(false); }}
-                      >
-                        Forgot Password?
-                      </button>
-                    )}
-                  </div>
-                  <div className="input-wrapper">
-                    <span className="input-icon">🔒</span>
-                    <input
-                      id="input-password"
-                      type={showPassword ? 'text' : 'password'}
-                      className="form-input"
-                      placeholder="••••••••••••"
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      required
-                      minLength={6}
-                    />
-                    <button
-                      type="button"
-                      className="password-toggle"
-                      onClick={() => setShowPassword(!showPassword)}
-                      title={showPassword ? 'Hide password' : 'Show password'}
-                    >
-                      {showPassword ? '👁️' : '👁️‍🗨️'}
-                    </button>
-                  </div>
-
-                  {/* Password strength meter for signup */}
-                  {mode === 'signup' && password.length > 0 && (
-                    <div className="strength-meter-wrap">
-                      <div className="strength-bar-bg">
-                        <div
-                          className="strength-bar-fill"
-                          style={{
-                            width: `${(strength.score / 4) * 100}%`,
-                            backgroundColor: strength.color,
-                          }}
-                        />
-                      </div>
-                      <span className="strength-text" style={{ color: strength.color }}>
-                        {strength.label}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {mode === 'login' && (
-                  <div className="form-options-row">
-                    <label className="checkbox-label">
-                      <input
-                        type="checkbox"
-                        checked={rememberMe}
-                        onChange={e => setRememberMe(e.target.checked)}
-                      />
-                      <span>Keep me signed in for 30 days</span>
-                    </label>
-                  </div>
-                )}
-
-                {/* Submit Action Button */}
-                <button
-                  type="submit"
-                  className="submit-action-btn"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <span className="btn-spinner-wrap">
-                      <span className="btn-spinner" /> Authenticating...
-                    </span>
-                  ) : mode === 'login' ? (
-                    'Sign In to Dashboard →'
-                  ) : (
-                    'Complete Registration →'
-                  )}
-                </button>
-              </form>
-            )}
-
-            {/* Instant Demo Emergency Link */}
-            <div className="login-card-footer">
-              <span>Judge / Evaluator?</span>
               <button
                 type="button"
-                className="footer-demo-link"
+                style={styles.alertAction}
                 onClick={() => handleInstantDemoLogin('engineer')}
               >
-                ⚡ Launch Instant Demo Session (No Login Required)
+                ⚡ Skip & Demo
               </button>
             </div>
+          )}
+
+          {/* Success */}
+          {successMsg && (
+            <div style={styles.alertSuccess}>
+              <span>✅</span>
+              <div>{successMsg}</div>
+            </div>
+          )}
+
+          {/* ── DEMO MODE ── */}
+          {mode === 'demo' ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={styles.demoFeaturesCard}>
+                <div style={styles.demoFeaturesLabel}>DEMO ENVIRONMENT INCLUDES</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {[
+                    'Real-time flood telemetry simulation',
+                    'AI-powered pump scheduling demo',
+                    'Rainfall risk analytics dashboard',
+                    'Interactive IoT control panel',
+                  ].map((feat) => (
+                    <div key={feat} style={styles.featureBullet}>
+                      <div style={styles.featureDot}>✓</div>
+                      <span style={styles.featureText}>{feat}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {(['engineer', 'manager', 'operator'] as const).map((key) => {
+                  const labels = { engineer: '⚡ Lead Dewatering Engineer', manager: '👷 Mine Operations Manager', operator: '📊 Control Room Operator' };
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      style={key === 'engineer' ? styles.primaryBtn : styles.secondaryBtn}
+                      onClick={() => handleInstantDemoLogin(key)}
+                    >
+                      {labels[key]} — Launch →
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            /* ── FORM ── */
+            <form onSubmit={handleSubmit} style={styles.form}>
+              {mode === 'signup' && (
+                <>
+                  <div style={styles.fieldGroup}>
+                    <label style={styles.fieldLabel}>Full Name</label>
+                    <div style={styles.inputBox}>
+                      <span style={styles.inputIcon}>👤</span>
+                      <input
+                        type="text"
+                        style={styles.input}
+                        placeholder="e.g. Dr. Rajesh Kumar"
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div style={styles.fieldGroup}>
+                    <label style={styles.fieldLabel}>Mining Designation</label>
+                    <div style={styles.inputBox}>
+                      <span style={styles.inputIcon}>🛡️</span>
+                      <select
+                        style={{ ...styles.input, cursor: 'pointer' }}
+                        value={role}
+                        onChange={e => setRole(e.target.value)}
+                      >
+                        <option>Dewatering Engineer</option>
+                        <option>Mine Operations Manager</option>
+                        <option>Control Room Operator</option>
+                        <option>Mine Safety Officer</option>
+                        <option>System Administrator</option>
+                      </select>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div style={styles.fieldGroup}>
+                <label style={styles.fieldLabel}>Email Address</label>
+                <div style={styles.inputBox}>
+                  <span style={styles.inputIcon}>✉️</span>
+                  <input
+                    type="email"
+                    style={styles.input}
+                    placeholder="you@rapid.com"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div style={styles.fieldGroup}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <label style={styles.fieldLabel}>Password</label>
+                  {mode === 'login' && (
+                    <button type="button" style={styles.forgotLink} onClick={() => { setShowForgotModal(true); setForgotSubmitted(false); }}>
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
+                <div style={styles.inputBox}>
+                  <span style={styles.inputIcon}>🔒</span>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    style={styles.input}
+                    placeholder="••••••••••••"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                  />
+                  <button type="button" style={styles.eyeBtn} onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? '👁️' : '👁️‍🗨️'}
+                  </button>
+                </div>
+                {mode === 'signup' && password.length > 0 && (
+                  <div style={{ marginTop: 8 }}>
+                    <div style={styles.strengthBar}>
+                      <div style={{ ...styles.strengthFill, width: `${(strength.score / 4) * 100}%`, background: strength.color }} />
+                    </div>
+                    <span style={{ fontSize: 11, color: strength.color, marginTop: 4, display: 'block' }}>{strength.label}</span>
+                  </div>
+                )}
+              </div>
+
+              {mode === 'login' && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={e => setRememberMe(e.target.checked)}
+                      style={{ accentColor: '#B7F34A', width: 14, height: 14 }}
+                    />
+                    <span style={{ fontSize: 13, color: '#8B9298' }}>Keep me signed in for 30 days</span>
+                  </label>
+                </div>
+              )}
+
+              {/* Primary CTA */}
+              <button type="submit" style={{ ...styles.primaryBtn, marginTop: 4 }} disabled={loading}>
+                {loading ? (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
+                    <span style={styles.spinner} /> Authenticating...
+                  </span>
+                ) : mode === 'login' ? 'Sign In →' : 'Complete Registration →'}
+              </button>
+
+              {/* Divider + demo fallback */}
+              <div style={styles.dividerRow}>
+                <div style={styles.dividerLine} />
+                <span style={{ fontSize: 11, color: '#8B9298', padding: '0 12px' }}>OR</span>
+                <div style={styles.dividerLine} />
+              </div>
+
+              <button type="button" style={styles.secondaryBtn} onClick={() => handleInstantDemoLogin('engineer')}>
+                Try RAPID Demo →
+              </button>
+            </form>
+          )}
+
+          {/* Footer */}
+          <div style={styles.authFooter}>
+            <span style={{ color: '#8B9298', fontSize: 13 }}>
+              {mode === 'login' ? 'New to RAPID?' : mode === 'signup' ? 'Already have an account?' : 'Judge / Evaluator?'}
+            </span>
+            <button
+              type="button"
+              style={styles.footerLink}
+              onClick={() => mode === 'login' ? setMode('signup') : mode === 'signup' ? setMode('login') : handleInstantDemoLogin('engineer')}
+            >
+              {mode === 'login' ? 'Create an account' : mode === 'signup' ? 'Sign in' : '⚡ Instant Demo (No Login)'}
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Forgot Password Modal */}
+      {/* ── FORGOT PASSWORD MODAL ── */}
       {showForgotModal && (
-        <div className="login-modal-overlay" onClick={() => setShowForgotModal(false)}>
-          <div className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <button className="modal-close-btn" onClick={() => setShowForgotModal(false)}>×</button>
-
+        <div style={styles.modalOverlay} onClick={() => setShowForgotModal(false)}>
+          <div style={styles.modalBox} onClick={e => e.stopPropagation()}>
+            <button style={styles.modalClose} onClick={() => setShowForgotModal(false)}>×</button>
             {!forgotSubmitted ? (
               <>
-                <div className="modal-icon">🔐</div>
-                <h3 className="modal-title">Reset Your Password</h3>
-                <p className="modal-desc">
-                  Enter your registered mining account email address below to receive password recovery instructions.
+                <div style={{ fontSize: 32, marginBottom: 12 }}>🔐</div>
+                <h3 style={{ color: '#F5F7F2', fontSize: 20, fontFamily: 'Outfit, sans-serif', fontWeight: 700, marginBottom: 8 }}>
+                  Reset Your Password
+                </h3>
+                <p style={{ color: '#8B9298', fontSize: 13, marginBottom: 20, lineHeight: 1.6 }}>
+                  Enter your registered email to receive reset instructions.
                 </p>
                 <form onSubmit={handleForgotSubmit}>
-                  <div className="form-group" style={{ marginBottom: 20 }}>
+                  <div style={styles.inputBox}>
+                    <span style={styles.inputIcon}>✉️</span>
                     <input
                       type="email"
-                      className="form-input"
-                      placeholder="e.g. demo@rapid.com"
+                      style={styles.input}
+                      placeholder="demo@rapid.com"
                       value={forgotEmail || email}
                       onChange={e => setForgotEmail(e.target.value)}
                       required
                     />
                   </div>
-                  <button type="submit" className="submit-action-btn">
-                    Send Password Reset Link →
+                  <button type="submit" style={{ ...styles.primaryBtn, marginTop: 16 }}>
+                    Send Reset Link →
                   </button>
                 </form>
               </>
             ) : (
-              <div className="modal-success-box">
-                <div className="modal-icon">📩</div>
-                <h3 className="modal-title">Reset Email Sent!</h3>
-                <p className="modal-desc">
-                  Password reset instructions have been sent to <strong>{forgotEmail || email || 'your email'}</strong>.
+              <>
+                <div style={{ fontSize: 32, marginBottom: 12 }}>📩</div>
+                <h3 style={{ color: '#F5F7F2', fontSize: 20, fontFamily: 'Outfit, sans-serif', fontWeight: 700, marginBottom: 8 }}>
+                  Reset Email Sent!
+                </h3>
+                <p style={{ color: '#8B9298', fontSize: 13, marginBottom: 20 }}>
+                  Instructions sent to <strong style={{ color: '#F5F7F2' }}>{forgotEmail || email || 'your email'}</strong>.
                 </p>
-                <button
-                  type="button"
-                  className="submit-action-btn"
-                  onClick={() => setShowForgotModal(false)}
-                >
+                <button type="button" style={styles.primaryBtn} onClick={() => setShowForgotModal(false)}>
                   Return to Sign In
                 </button>
-              </div>
+              </>
             )}
           </div>
         </div>
       )}
     </div>
   );
+};
+
+// ── STYLES (matches Figma tokens exactly) ──────────────────────────────────
+const styles: Record<string, React.CSSProperties> = {
+  root: {
+    display: 'flex',
+    height: '100vh',
+    width: '100vw',
+    overflow: 'hidden',
+    fontFamily: "'Geist', 'Inter', sans-serif",
+    background: '#111416',
+  },
+  // LEFT PANEL
+  leftPanel: {
+    flex: '0 0 55%',
+    background: '#0B0D0F',
+    padding: '64px',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  glowOrb: {
+    position: 'absolute',
+    borderRadius: '50%',
+    filter: 'blur(80px)',
+    opacity: 0.18,
+    pointerEvents: 'none',
+  },
+  glowLime: {
+    width: 350,
+    height: 350,
+    background: '#B7F34A',
+    top: -80,
+    left: -60,
+  },
+  glowCyan: {
+    width: 250,
+    height: 250,
+    background: '#63D9FF',
+    bottom: 60,
+    right: 40,
+  },
+  brandingTop: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 16,
+    position: 'relative',
+    zIndex: 1,
+  },
+  logoRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+  },
+  logoMark: {
+    width: 28,
+    height: 28,
+    background: '#B7F34A',
+    borderRadius: 6,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoText: {
+    fontFamily: "'Outfit', sans-serif",
+    fontWeight: 800,
+    fontSize: 22,
+    color: '#F5F7F2',
+    letterSpacing: '-0.02em',
+  },
+  tagline: {
+    fontFamily: "'Geist', sans-serif",
+    fontWeight: 700,
+    fontSize: 11,
+    color: '#8B9298',
+    letterSpacing: '0.1em',
+  },
+  brandingCenter: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 48,
+    flex: 1,
+    justifyContent: 'center',
+    position: 'relative',
+    zIndex: 1,
+  },
+  heroTextBlock: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 16,
+  },
+  heroHeadline: {
+    fontFamily: "'Outfit', sans-serif",
+    fontWeight: 700,
+    fontSize: 44,
+    color: '#F5F7F2',
+    lineHeight: 1.1,
+    margin: 0,
+    letterSpacing: '-0.02em',
+  },
+  heroCopy: {
+    fontFamily: "'Geist', sans-serif",
+    fontWeight: 400,
+    fontSize: 16,
+    color: '#8B9298',
+    lineHeight: 1.6,
+    margin: 0,
+  },
+  miniCard: {
+    background: '#111416',
+    borderRadius: 12,
+    padding: 24,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 16,
+    border: '1px solid #22252A',
+  },
+  miniCardHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  miniCardLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+  },
+  activeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: '50%',
+    background: '#B7F34A',
+    boxShadow: '0 0 8px #B7F34A',
+  },
+  miniCardLabel: {
+    fontSize: 13,
+    fontFamily: "'Geist', sans-serif",
+    color: '#F5F7F2',
+    fontWeight: 500,
+  },
+  speedBadge: {
+    fontSize: 11,
+    color: '#B7F34A',
+    background: 'rgba(183,243,74,0.1)',
+    border: '1px solid rgba(183,243,74,0.2)',
+    padding: '3px 8px',
+    borderRadius: 4,
+    fontFamily: "'Geist', sans-serif",
+    fontWeight: 600,
+  },
+  metricsRow: {
+    display: 'flex',
+    gap: 12,
+  },
+  metricBox: {
+    flex: 1,
+    background: '#0B0D0F',
+    borderRadius: 6,
+    padding: 12,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 4,
+  },
+  metricBoxLabel: {
+    fontSize: 10,
+    color: '#8B9298',
+    fontFamily: "'Geist', sans-serif",
+    fontWeight: 600,
+    letterSpacing: '0.08em',
+  },
+  metricBoxValue: {
+    fontSize: 18,
+    fontFamily: "'Geist', sans-serif",
+    fontWeight: 700,
+    color: '#F5F7F2',
+  },
+  metricUnit: {
+    fontSize: 12,
+    color: '#8B9298',
+    marginLeft: 2,
+  },
+  codeRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 4,
+  },
+  codeText: {
+    fontSize: 11,
+    fontFamily: "'Geist Mono', 'JetBrains Mono', monospace",
+    color: '#8B9298',
+  },
+  brandingBottom: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    position: 'relative',
+    zIndex: 1,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: '50%',
+    background: '#B7F34A',
+    boxShadow: '0 0 6px #B7F34A',
+  },
+  statusLabel: {
+    fontSize: 11,
+    fontFamily: "'Geist', sans-serif",
+    fontWeight: 600,
+    color: '#8B9298',
+    letterSpacing: '0.1em',
+  },
+  // RIGHT PANEL
+  rightPanel: {
+    flex: 1,
+    background: '#111416',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '64px 48px',
+    overflowY: 'auto',
+  },
+  authCard: {
+    width: '100%',
+    maxWidth: 420,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 24,
+  },
+  backBtn: {
+    background: 'none',
+    border: 'none',
+    color: '#8B9298',
+    fontSize: 13,
+    cursor: 'pointer',
+    padding: 0,
+    fontFamily: "'Geist', sans-serif",
+    textAlign: 'left',
+    transition: 'color 0.2s',
+  },
+  authHeader: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+  },
+  authTitle: {
+    fontFamily: "'Outfit', sans-serif",
+    fontWeight: 700,
+    fontSize: 32,
+    color: '#F5F7F2',
+    margin: 0,
+    letterSpacing: '-0.02em',
+  },
+  authSubtitle: {
+    fontFamily: "'Geist', sans-serif",
+    fontWeight: 400,
+    fontSize: 14,
+    color: '#8B9298',
+    margin: 0,
+    lineHeight: 1.5,
+  },
+  tabBar: {
+    display: 'flex',
+    borderBottom: '1px solid #22252A',
+    gap: 0,
+  },
+  tab: {
+    background: 'none',
+    border: 'none',
+    color: '#8B9298',
+    fontSize: 12,
+    fontFamily: "'Geist', sans-serif",
+    fontWeight: 700,
+    cursor: 'pointer',
+    padding: '10px 16px 10px 0',
+    letterSpacing: '0.06em',
+    position: 'relative',
+    transition: 'color 0.2s',
+    marginRight: 20,
+  },
+  tabActive: {
+    color: '#F5F7F2',
+  },
+  tabUnderline: {
+    position: 'absolute',
+    bottom: -1,
+    left: 0,
+    right: 0,
+    height: 2,
+    background: '#B7F34A',
+    borderRadius: 1,
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 16,
+  },
+  fieldGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 6,
+  },
+  fieldLabel: {
+    fontSize: 12,
+    fontFamily: "'Geist', sans-serif",
+    fontWeight: 600,
+    color: '#8B9298',
+    letterSpacing: '0.04em',
+  },
+  inputBox: {
+    display: 'flex',
+    alignItems: 'center',
+    background: '#15181B',
+    border: '1px solid #22252A',
+    borderRadius: 8,
+    padding: '0 16px',
+    gap: 8,
+    transition: 'border-color 0.2s',
+  },
+  inputIcon: {
+    fontSize: 14,
+    flexShrink: 0,
+  },
+  input: {
+    flex: 1,
+    background: 'none',
+    border: 'none',
+    outline: 'none',
+    color: '#F5F7F2',
+    fontSize: 14,
+    fontFamily: "'Geist', sans-serif",
+    padding: '12px 0',
+  },
+  eyeBtn: {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: 14,
+    padding: 0,
+    color: '#8B9298',
+  },
+  strengthBar: {
+    height: 3,
+    background: '#22252A',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  strengthFill: {
+    height: '100%',
+    borderRadius: 2,
+    transition: 'width 0.3s ease, background 0.3s ease',
+  },
+  forgotLink: {
+    background: 'none',
+    border: 'none',
+    color: '#B7F34A',
+    fontSize: 13,
+    cursor: 'pointer',
+    fontFamily: "'Geist', sans-serif",
+    fontWeight: 600,
+    padding: 0,
+  },
+  primaryBtn: {
+    width: '100%',
+    background: '#B7F34A',
+    color: '#0B0D0F',
+    border: 'none',
+    borderRadius: 8,
+    padding: '13px 20px',
+    fontSize: 14,
+    fontFamily: "'Geist', sans-serif",
+    fontWeight: 700,
+    cursor: 'pointer',
+    transition: 'opacity 0.2s, transform 0.15s',
+    letterSpacing: '0.02em',
+  },
+  secondaryBtn: {
+    width: '100%',
+    background: 'transparent',
+    color: '#F5F7F2',
+    border: '1px solid #22252A',
+    borderRadius: 8,
+    padding: '13px 20px',
+    fontSize: 14,
+    fontFamily: "'Geist', sans-serif",
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'border-color 0.2s, background 0.2s',
+  },
+  dividerRow: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    background: '#22252A',
+  },
+  alertDanger: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: 10,
+    background: 'rgba(239,68,68,0.08)',
+    border: '1px solid rgba(239,68,68,0.25)',
+    borderRadius: 8,
+    padding: '12px 14px',
+    fontSize: 13,
+    color: '#F5F7F2',
+    fontFamily: "'Geist', sans-serif",
+  },
+  alertSuccess: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    background: 'rgba(183,243,74,0.08)',
+    border: '1px solid rgba(183,243,74,0.2)',
+    borderRadius: 8,
+    padding: '12px 14px',
+    fontSize: 13,
+    color: '#B7F34A',
+    fontFamily: "'Geist', sans-serif",
+  },
+  alertAction: {
+    background: 'rgba(239,68,68,0.15)',
+    border: '1px solid rgba(239,68,68,0.3)',
+    borderRadius: 6,
+    color: '#F5F7F2',
+    fontSize: 12,
+    padding: '5px 10px',
+    cursor: 'pointer',
+    fontFamily: "'Geist', sans-serif",
+    whiteSpace: 'nowrap',
+  },
+  demoFeaturesCard: {
+    background: '#0B0D0F',
+    borderRadius: 12,
+    padding: 24,
+    border: '1px solid #22252A',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 16,
+  },
+  demoFeaturesLabel: {
+    fontSize: 11,
+    fontFamily: "'Geist', sans-serif",
+    fontWeight: 700,
+    color: '#8B9298',
+    letterSpacing: '0.1em',
+  },
+  featureBullet: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+  },
+  featureDot: {
+    width: 20,
+    height: 20,
+    borderRadius: 8,
+    background: 'rgba(183,243,74,0.15)',
+    color: '#B7F34A',
+    fontSize: 11,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontWeight: 700,
+    flexShrink: 0,
+  },
+  featureText: {
+    fontSize: 13,
+    color: '#F5F7F2',
+    fontFamily: "'Geist', sans-serif",
+  },
+  authFooter: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    justifyContent: 'center',
+    paddingTop: 4,
+  },
+  footerLink: {
+    background: 'none',
+    border: 'none',
+    color: '#B7F34A',
+    fontSize: 13,
+    cursor: 'pointer',
+    fontFamily: "'Geist', sans-serif",
+    fontWeight: 600,
+    padding: 0,
+  },
+  spinner: {
+    width: 14,
+    height: 14,
+    border: '2px solid rgba(0,0,0,0.2)',
+    borderTopColor: '#0B0D0F',
+    borderRadius: '50%',
+    display: 'inline-block',
+    animation: 'spin 0.6s linear infinite',
+  },
+  // MODAL
+  modalOverlay: {
+    position: 'fixed',
+    inset: 0,
+    background: 'rgba(0,0,0,0.7)',
+    backdropFilter: 'blur(6px)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 100,
+  },
+  modalBox: {
+    background: '#15181B',
+    border: '1px solid #22252A',
+    borderRadius: 16,
+    padding: 32,
+    width: 380,
+    position: 'relative',
+    textAlign: 'center',
+  },
+  modalClose: {
+    position: 'absolute',
+    top: 14,
+    right: 16,
+    background: 'none',
+    border: 'none',
+    color: '#8B9298',
+    fontSize: 20,
+    cursor: 'pointer',
+  },
 };
