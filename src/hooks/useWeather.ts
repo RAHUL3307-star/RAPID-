@@ -11,7 +11,7 @@ export function useWeather() {
 
     async function load() {
       const apiKey   = import.meta.env.VITE_WEATHER_API_KEY;
-      const location = import.meta.env.VITE_WEATHER_LOCATION || 'Kolkata';
+      const location = import.meta.env.VITE_WEATHER_LOCATION || 'Chennai, Tamil Nadu, India';
 
       if (apiKey) {
         const data = await fetchWeatherData(apiKey, location);

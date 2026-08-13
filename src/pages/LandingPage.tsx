@@ -8,17 +8,6 @@ interface LandingPageProps {
   onDashboard:  () => void;
 }
 
-/* ── Animated rain drops ── */
-const DROPS = Array.from({ length: 40 }, (_, i) => ({
-  id: i,
-  left: `${(i / 40) * 100 + (Math.random() * 2.5 - 1.25)}%`,
-  height: `${Math.random() * 22 + 10}px`,
-  delay: `${Math.random() * 5}s`,
-  duration: `${Math.random() * 1.2 + 1}s`,
-  opacity: Math.random() * 0.35 + 0.1,
-  width: `${Math.random() * 1.5 + 0.5}px`,
-}));
-
 /* ── Scroll-reveal hook ── */
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -32,25 +21,6 @@ function useReveal() {
     return () => obs.disconnect();
   }, []);
   return { ref, visible };
-}
-
-/* ── Animated counter ── */
-function CountUp({ target, suffix = '' }: { target: number; suffix?: string }) {
-  const [val, setVal] = useState(0);
-  const { ref, visible } = useReveal();
-  useEffect(() => {
-    if (!visible) return;
-    const dur = 1400;
-    const start = performance.now();
-    const tick = (now: number) => {
-      const t = Math.min((now - start) / dur, 1);
-      const ease = 1 - Math.pow(1 - t, 3);
-      setVal(Math.round(ease * target));
-      if (t < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  }, [visible, target]);
-  return <span ref={ref}>{val}{suffix}</span>;
 }
 
 /* ── Section wrapper with reveal ── */
@@ -73,22 +43,194 @@ function Section({ children, id, bg }: { children: React.ReactNode; id?: string;
   );
 }
 
+/* ── Topographic SVG map with premium animations ── */
+const TopoMap: React.FC = () => (
+  <div style={{
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+    background: '#071512',
+    borderRadius: 'inherit',
+    overflow: 'hidden',
+  }}>
+    <svg
+      viewBox="0 0 440 280"
+      style={{ width: '100%', height: '100%', opacity: 0.95 }}
+      preserveAspectRatio="xMidYMid slice"
+    >
+      {/* Animated contour lines */}
+      {[0,1,2,3,4,5,6,7,8,9,10,11,12].map(i => (
+        <ellipse
+          key={i}
+          cx={220 + Math.sin(i * 0.7) * 12}
+          cy={140 + Math.cos(i * 0.5) * 8}
+          rx={30 + i * 18}
+          ry={18 + i * 11}
+          fill="none"
+          stroke={i % 5 === 0 ? '#1affe4' : '#0d8a78'}
+          strokeWidth={i % 5 === 0 ? 1.4 : 0.7}
+          strokeDasharray={i % 5 === 0 ? '6 3' : 'none'}
+          opacity={1 - i * 0.04}
+          transform={`rotate(${i * 8 - 20} 220 140)`}
+        >
+          {i % 5 === 0 && (
+            <animateTransform
+              attributeName="transform"
+              type="rotate"
+              from={`${i * 8 - 20} 220 140`}
+              to={`${i * 8 + 340} 220 140`}
+              dur={`${30 + i * 5}s`}
+              repeatCount="indefinite"
+            />
+          )}
+        </ellipse>
+      ))}
+
+      {/* River-like animated path */}
+      <path
+        d="M80,180 C110,160 140,170 170,155 C200,140 230,150 260,140 C290,130 320,145 350,135 C370,128 390,135 410,130"
+        fill="none" stroke="#00e5c4" strokeWidth="3" opacity="0.8" strokeLinecap="round"
+        strokeDasharray="8 4"
+      >
+        <animate attributeName="stroke-dashoffset" from="24" to="0" dur="2s" repeatCount="indefinite" />
+      </path>
+
+      {/* Secondary contours */}
+      {[0,1,2,3,4,5].map(i => (
+        <path
+          key={`c${i}`}
+          d={`M${50 + i*15},${60+i*8} C${100+i*20},${80+i*5} ${200+i*10},${90+i*7} ${300+i*15},${85+i*6} C${360+i*12},${82+i*5} ${400+i*8},${100+i*4} ${430},${110+i*3}`}
+          fill="none"
+          stroke={i % 2 === 0 ? '#0d8a78' : '#0a6659'}
+          strokeWidth={0.6}
+          opacity={0.7}
+        />
+      ))}
+
+      {/* Grid overlay */}
+      {[0,1,2,3,4,5,6].map(i => (
+        <line key={`h${i}`} x1="0" y1={i*47} x2="440" y2={i*47} stroke="#0d5047" strokeWidth="0.4" opacity="0.4" />
+      ))}
+      {[0,1,2,3,4,5,6,7,8,9].map(i => (
+        <line key={`v${i}`} x1={i*49} y1="0" x2={i*49} y2="280" stroke="#0d5047" strokeWidth="0.4" opacity="0.4" />
+      ))}
+
+      {/* Radar scanning sweep */}
+      <g transform="translate(220,140)">
+        <line x1="0" y1="0" x2="160" y2="0" stroke="#00e5c4" strokeWidth="1.5" opacity="0.6">
+          <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="4s" repeatCount="indefinite" />
+        </line>
+        <polygon points="0,0 160,-30 160,0" fill="#00e5c4" opacity="0.08">
+          <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="4s" repeatCount="indefinite" />
+        </polygon>
+      </g>
+
+      {/* Sensor Node Pings */}
+      {[
+        { x: 120, y: 100, label: 'S1' },
+        { x: 310, y: 90,  label: 'S2' },
+        { x: 160, y: 200, label: 'S3' },
+        { x: 350, y: 210, label: 'S4' },
+      ].map((node, idx) => (
+        <g key={node.label}>
+          <circle cx={node.x} cy={node.y} r="4" fill="#B7F34A" />
+          <circle cx={node.x} cy={node.y} r="10" fill="none" stroke="#B7F34A" strokeWidth="1" opacity="0.6">
+            <animate attributeName="r" values="4;16;4" dur={`${1.8 + idx * 0.4}s`} repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.8;0;0.8" dur={`${1.8 + idx * 0.4}s`} repeatCount="indefinite" />
+          </circle>
+          <text x={node.x + 7} y={node.y + 3} fill="#8B9298" fontSize="8" fontFamily="'Geist Mono', monospace">{node.label}</text>
+        </g>
+      ))}
+
+      {/* Center main pulse */}
+      <circle cx="220" cy="140" r="6" fill="#00e5c4" opacity="0.9" />
+      <circle cx="220" cy="140" r="14" fill="none" stroke="#00e5c4" strokeWidth="1.8" opacity="0.6">
+        <animate attributeName="r" values="8;28;8" dur="2s" repeatCount="indefinite" />
+        <animate attributeName="opacity" values="0.7;0;0.7" dur="2s" repeatCount="indefinite" />
+      </circle>
+    </svg>
+
+    {/* Zone label */}
+    <div style={{
+      position: 'absolute', top: 14, left: 16,
+      display: 'flex', alignItems: 'center', gap: 10,
+    }}>
+      <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#00e5c4', boxShadow: '0 0 8px #00e5c4', animation: 'pulseDot 1.5s ease infinite' }} />
+      <span style={{ fontSize: 11, color: '#00e5c4', fontFamily: "'Geist Mono', monospace", letterSpacing: '0.08em' }}>
+        ZONE_H4 // COOPER RIVER
+      </span>
+      <span style={{ fontSize: 11, color: '#8B9298', fontFamily: "'Geist Mono', monospace", marginLeft: 8 }}>
+        ALT. 12m
+      </span>
+    </div>
+
+    {/* Rotating Crosshair */}
+    <div style={{ position: 'absolute', bottom: 18, right: 18, opacity: 0.85 }}>
+      <svg width="28" height="28" fill="none" viewBox="0 0 28 28" style={{ animation: 'spin 12s linear infinite' }}>
+        <circle cx="14" cy="14" r="10" stroke="#00e5c4" strokeWidth="1.2" strokeDasharray="4 2" />
+        <circle cx="14" cy="14" r="4"  stroke="#00e5c4" strokeWidth="1.2" />
+        <line x1="14" y1="2" x2="14" y2="8"   stroke="#00e5c4" strokeWidth="1.2" />
+        <line x1="14" y1="20" x2="14" y2="26" stroke="#00e5c4" strokeWidth="1.2" />
+        <line x1="2"  y1="14" x2="8"  y2="14" stroke="#00e5c4" strokeWidth="1.2" />
+        <line x1="20" y1="14" x2="26" y2="14" stroke="#00e5c4" strokeWidth="1.2" />
+      </svg>
+    </div>
+
+    {/* Simulated surge badge */}
+    <div style={{
+      position: 'absolute', bottom: 14, left: 14,
+      background: 'rgba(0,229,196,0.12)',
+      border: '1px solid rgba(0,229,196,0.35)',
+      borderRadius: 8, padding: '5px 12px',
+      display: 'flex', alignItems: 'center', gap: 8,
+      backdropFilter: 'blur(4px)',
+    }}>
+      <span style={{ fontSize: 11, color: '#8B9298', fontFamily: "'Geist', sans-serif" }}>SIMULATED SURGE</span>
+      <span style={{ fontSize: 14, fontWeight: 700, color: '#00e5c4', fontFamily: "'Geist Mono', monospace" }}>+2.45m</span>
+    </div>
+  </div>
+);
+
+/* ── Metric sidebar sparkline ── */
+const MiniSpark: React.FC<{ color: string }> = ({ color }) => {
+  const pts = [0,3,1,5,2,4,6,3,5,7].map((v, i, a) =>
+    `${(i / (a.length - 1)) * 60},${16 - (v / 7) * 14}`
+  ).join(' ');
+  return (
+    <svg width={60} height={16} style={{ overflow: 'visible' }}>
+      <polyline points={pts} fill="none" stroke={color} strokeWidth={1.4}
+        strokeLinejoin="round" strokeLinecap="round" opacity={0.8} />
+    </svg>
+  );
+};
+
+/* ── Surge donut ── */
+const SurgeDonut: React.FC<{ pct: number }> = ({ pct }) => {
+  const r = 22, c = 2 * Math.PI * r;
+  const fill = c * (1 - pct / 100);
+  return (
+    <svg width={60} height={60} viewBox="0 0 60 60">
+      <circle cx={30} cy={30} r={r} fill="none" stroke="#22252A" strokeWidth={5} />
+      <circle cx={30} cy={30} r={r} fill="none" stroke="#EF4444" strokeWidth={5}
+        strokeDasharray={`${c}`} strokeDashoffset={fill} strokeLinecap="round"
+        transform="rotate(-90 30 30)" />
+      <text x={30} y={34} textAnchor="middle"
+        style={{ fontSize: 13, fontWeight: 700, fill: '#F5F7F2', fontFamily: "'Geist Mono', monospace" }}>
+        {pct}%
+      </text>
+    </svg>
+  );
+};
+
 export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGetStarted, user, onDashboard }) => {
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled, setScrolled]   = useState(false);
   const [heroMounted, setHeroMounted] = useState(false);
-  const [activeMetric, setActiveMetric] = useState(0);
 
   useEffect(() => {
     setTimeout(() => setHeroMounted(true), 100);
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  // Cycle through live metrics
-  useEffect(() => {
-    const t = setInterval(() => setActiveMetric(p => (p + 1) % 4), 2000);
-    return () => clearInterval(t);
   }, []);
 
   const scrollTo = (id: string) =>
@@ -100,8 +242,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGetStarted,
       {/* ══════════════ NAVBAR ══════════════ */}
       <nav style={{
         ...S.nav,
-        background: scrolled ? 'rgba(11,13,15,0.95)' : 'transparent',
-        borderBottom: scrolled ? '1px solid #22252A' : '1px solid transparent',
+        background: scrolled ? 'rgba(10,12,14,0.96)' : '#0B0D0F',
+        borderBottom: '1px solid #1a1e22',
         backdropFilter: scrolled ? 'blur(16px)' : 'none',
       }}>
         <div style={S.navInner}>
@@ -118,16 +260,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGetStarted,
           {/* Links */}
           <ul style={S.navLinks}>
             {[
-              ['How It Works', 'how'],
-              ['Features', 'features'],
-              ['Pump Modes', 'modes'],
-              ['Technology', 'tech'],
+              ['Platform',        'how'],
+              ['Scientific Data', 'features'],
+              ['Risk Simulator',  'modes'],
+              ['Hardware',        'tech'],
             ].map(([label, id]) => (
               <li key={id}>
-                <button
-                  style={S.navLink}
-                  onClick={() => scrollTo(id)}
-                >
+                <button style={S.navLink} onClick={() => scrollTo(id)}>
                   {label}
                 </button>
               </li>
@@ -136,15 +275,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGetStarted,
 
           {/* Actions */}
           <div style={S.navActions}>
+            {/* SYS_ONLINE chip */}
+            <div style={S.sysChip}>
+              <div style={S.sysDot} />
+              <span style={{ fontSize: 11, fontWeight: 700, fontFamily: "'Geist Mono', monospace", letterSpacing: '0.05em' }}>
+                SYS_ONLINE
+              </span>
+            </div>
             {user ? (
-              <button style={S.primaryBtn} onClick={onDashboard}>
+              <button style={S.requestBtn} onClick={onDashboard}>
                 Open Dashboard →
               </button>
             ) : (
-              <>
-                <button style={S.ghostBtn} onClick={onLogin}>Log In</button>
-                <button style={S.primaryBtn} onClick={onGetStarted}>Get Started →</button>
-              </>
+              <button style={S.requestBtn} onClick={onGetStarted}>
+                Request Access
+              </button>
             )}
           </div>
         </div>
@@ -152,28 +297,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGetStarted,
 
       {/* ══════════════ HERO ══════════════ */}
       <section style={S.hero}>
-        {/* Background layers */}
+        {/* Background */}
         <div style={S.heroBg}>
           <div style={{ ...S.glow, ...S.glowLime }} />
           <div style={{ ...S.glow, ...S.glowCyan }} />
-          <div style={{ ...S.glow, ...S.glowPurple }} />
-          {/* Grid lines */}
           <div style={S.heroGrid} />
-          {/* Rain drops */}
-          <div style={S.rainContainer}>
-            {DROPS.map(d => (
-              <div key={d.id} style={{
-                position: 'absolute',
-                left: d.left,
-                width: d.width,
-                height: d.height,
-                background: 'linear-gradient(to bottom, transparent, rgba(99,217,255,0.6))',
-                borderRadius: 2,
-                animation: `rainFall ${d.duration} linear ${d.delay} infinite`,
-                opacity: d.opacity,
-              }} />
-            ))}
-          </div>
         </div>
 
         <div style={S.heroInner}>
@@ -187,46 +315,38 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGetStarted,
             {/* Badge */}
             <div style={S.badge}>
               <div style={S.badgeDot} />
-              Smart India Hackathon 2026 · SIH Project
+              REAL-TIME FLOOD INTELLIGENCE
             </div>
 
             <h1 style={S.heroH1}>
-              Intelligent<br />
-              <span style={{ color: '#B7F34A' }}>Dewatering,</span><br />
-              Predictive by Design.
+              Predict the water.<br />
+              Protect what<br />
+              matters.
             </h1>
 
             <p style={S.heroCopy}>
-              RAPID uses real-time rainfall data + AI to predict water level rise
-              60 minutes ahead, automatically activating the right pump mode before flooding begins.
+              Hyper-local rainfall monitoring, predictive inundation
+              modeling, and real-time scenario simulation. We translate
+              complex hydrological dynamics into clear, actionable flood
+              intelligence.
             </p>
 
             <div style={S.heroCtas}>
               <button style={S.ctaPrimary} onClick={onGetStarted}>
-                🚀 Get Started Free
+                Start Monitoring
               </button>
               <button style={S.ctaOutline} onClick={() => scrollTo('how')}>
-                ▶ See How It Works
+                See How It Works
               </button>
             </div>
 
-            {/* Mini stats */}
-            <div style={S.heroStats}>
-              {[
-                { val: '60', suffix: ' min', lbl: 'Prediction Horizon' },
-                { val: 99,   suffix: '.9%',  lbl: 'System Uptime', isNum: true },
-                { val: '4',  suffix: '',     lbl: 'AI Pump Modes' },
-                { val: '1M', suffix: '+',    lbl: 'API Calls/mo' },
-              ].map((s) => (
-                <div key={s.lbl} style={S.heroStat}>
-                  <div style={S.heroStatVal}>
-                    {s.lbl === 'System Uptime' ? (
-                      <><CountUp target={99} />{s.suffix}</>
-                    ) : s.val}{s.lbl !== 'System Uptime' ? s.suffix : ''}
-                  </div>
-                  <div style={S.heroStatLbl}>{s.lbl}</div>
-                </div>
-              ))}
+            {/* Station count */}
+            <div style={S.stationLine}>
+              <div style={S.stationDot} />
+              <span style={{ fontSize: 13, color: '#8B9298', fontFamily: "'Geist', sans-serif" }}>
+                Active stream telemetry:{' '}
+                <strong style={{ color: '#F5F7F2' }}>2,400+ stations live</strong>
+              </span>
             </div>
           </div>
 
@@ -235,132 +355,67 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGetStarted,
             ...S.heroRight,
             opacity: heroMounted ? 1 : 0,
             transform: heroMounted ? 'translateX(0)' : 'translateX(40px)',
-            transition: 'all 0.8s cubic-bezier(0.16,1,0.3,1) 0.15s',
+            transition: 'all 0.9s cubic-bezier(0.16,1,0.3,1) 0.15s',
           }}>
-            {/* Floating alert badge */}
-            <div style={{ ...S.floatCard, top: '5%', right: '-5%', animationDelay: '0s' }}>
-              <div style={S.floatBadge}>
-                <span style={{ ...S.floatDot, background: '#EF4444', boxShadow: '0 0 8px #EF4444' }} />
-                <div>
-                  <div style={{ fontSize: 10, color: '#8B9298', fontFamily: "'Geist', sans-serif" }}>ALERT</div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: '#F5F7F2', fontFamily: "'Geist', sans-serif" }}>Heavy Rain Detected</div>
-                </div>
-              </div>
+            {/* Topo map panel */}
+            <div style={S.topoWrap}>
+              <TopoMap />
             </div>
 
-            {/* Main dashboard preview card */}
-            <div style={S.dashCard}>
-              <div style={S.dashCardHeader}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={S.logoMarkSmall}>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
-                      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="#0B0D0F" />
-                    </svg>
+            {/* Right metric sidebar */}
+            <div style={S.metricSidebar}>
+              {/* Rainfall Intensity */}
+              <div style={S.metricCard}>
+                <div style={S.metricRow}>
+                  <span style={S.metricLabel}>RAINFALL INTENSITY</span>
+                  <span style={{ ...S.metricBadge, color: '#EF4444', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)' }}>PEAK</span>
+                </div>
+                <div style={S.metricVal}>
+                  <span style={{ fontSize: 28, fontWeight: 700, color: '#F5F7F2', fontFamily: "'Geist Mono', monospace" }}>18.4</span>
+                  <span style={{ fontSize: 12, color: '#8B9298', marginLeft: 4, fontFamily: "'Geist', sans-serif" }}>mm/hr</span>
+                </div>
+                <div style={S.metricTrend}>
+                  <span style={S.metricTrendLabel}>6hr Historical Trend</span>
+                  <MiniSpark color="#63D9FF" />
+                </div>
+              </div>
+
+              {/* Current Stage */}
+              <div style={S.metricCard}>
+                <div style={S.metricRow}>
+                  <span style={S.metricLabel}>CURRENT STAGE</span>
+                  <span style={{ ...S.metricBadge, color: '#63D9FF', background: 'rgba(99,217,255,0.12)', border: '1px solid rgba(99,217,255,0.25)' }}>HIGH</span>
+                </div>
+                <div style={S.metricVal}>
+                  <span style={{ fontSize: 28, fontWeight: 700, color: '#F5F7F2', fontFamily: "'Geist Mono', monospace" }}>1.84</span>
+                  <span style={{ fontSize: 12, color: '#8B9298', marginLeft: 4, fontFamily: "'Geist', sans-serif" }}>m</span>
+                </div>
+                <div style={S.metricTrend}>
+                  <span style={S.metricTrendLabel}>6hr Historical Trend</span>
+                  <MiniSpark color="#B7F34A" />
+                </div>
+              </div>
+
+              {/* Surge Probability */}
+              <div style={S.metricCard}>
+                <div style={S.metricRow}>
+                  <span style={S.metricLabel}>SURGE PROBABILITY</span>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#EF4444', boxShadow: '0 0 6px #EF4444', animation: 'pulseDot 1.5s ease infinite' }} />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 6 }}>
+                  <SurgeDonut pct={84} />
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: '#EF4444', fontFamily: "'Geist', sans-serif", marginBottom: 4 }}>High Risk</div>
+                    <div style={{ fontSize: 11, color: '#8B9298', fontFamily: "'Geist', sans-serif", lineHeight: 1.5 }}>
+                      Exceeds normal peak<br />levels in 2.4 hrs.
+                    </div>
                   </div>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: '#F5F7F2', fontFamily: "'Geist', sans-serif" }}>
-                    RAPID Dashboard
-                  </span>
-                </div>
-                <div style={S.liveBadge}>
-                  <div style={S.liveDot} />
-                  LIVE
-                </div>
-              </div>
-
-              {/* Animated metrics */}
-              <div style={S.dashMetrics}>
-                {[
-                  { lbl: 'Water Level', val: '63', unit: '%', fill: 63, color: '#63D9FF' },
-                  { lbl: 'Rain Prob.',  val: '85', unit: '%', fill: 85, color: '#EF4444' },
-                  { lbl: 'Battery',     val: '87', unit: '%', fill: 87, color: '#B7F34A' },
-                  { lbl: 'Solar',       val: '720', unit: 'W', fill: 72, color: '#F59E0B' },
-                ].map((m, i) => (
-                  <div key={m.lbl} style={{ ...S.dashMetric, background: activeMetric === i ? `${m.color}12` : '#0B0D0F', transition: 'background 0.4s ease' }}>
-                    <div style={{ fontSize: 10, color: '#8B9298', fontFamily: "'Geist', sans-serif", letterSpacing: '0.06em' }}>{m.lbl}</div>
-                    <div style={{ fontSize: 18, fontWeight: 700, color: m.color, fontFamily: "'Geist Mono', monospace" }}>
-                      {m.val}<span style={{ fontSize: 11, color: '#8B9298' }}>{m.unit}</span>
-                    </div>
-                    <div style={{ height: 3, background: '#22252A', borderRadius: 2, marginTop: 6 }}>
-                      <div style={{ height: '100%', width: `${m.fill}%`, background: m.color, borderRadius: 2, transition: 'width 1s ease' }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Pump modes */}
-              <div style={S.pumpRow}>
-                <div style={{ fontSize: 10, color: '#8B9298', marginBottom: 8, fontFamily: "'Geist', sans-serif", letterSpacing: '0.08em' }}>PUMP MODE</div>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {[
-                    { label: 'OFF',       color: '#8B9298', bg: '#22252A' },
-                    { label: 'LOW',       color: '#63D9FF', bg: 'rgba(99,217,255,0.15)' },
-                    { label: 'HIGH ●',    color: '#EF4444', bg: 'rgba(239,68,68,0.15)', active: true },
-                    { label: 'EMERGENCY', color: '#F97316', bg: 'rgba(249,115,22,0.1)' },
-                  ].map(p => (
-                    <div key={p.label} style={{
-                      padding: '5px 9px',
-                      borderRadius: 5,
-                      background: p.bg,
-                      fontSize: 10,
-                      fontWeight: p.active ? 700 : 500,
-                      color: p.color,
-                      fontFamily: "'Geist', sans-serif",
-                      border: p.active ? `1px solid ${p.color}40` : '1px solid transparent',
-                    }}>
-                      {p.label}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* AI prediction row */}
-              <div style={S.aiRow}>
-                <span style={S.aiTag}>🤖 AI PREDICTION</span>
-                <div style={{ display: 'flex', gap: 12, fontSize: 12, fontFamily: "'Geist Mono', monospace" }}>
-                  <span style={{ color: '#63D9FF' }}>+30min: 72%</span>
-                  <span style={{ color: '#EF4444' }}>+60min: 89%</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Floating AI badge */}
-            <div style={{ ...S.floatCard, bottom: '8%', left: '-8%', animationDelay: '1s' }}>
-              <div style={S.floatBadge}>
-                <span style={{ ...S.floatDot, background: '#B7F34A', boxShadow: '0 0 8px #B7F34A' }} />
-                <div>
-                  <div style={{ fontSize: 10, color: '#8B9298', fontFamily: "'Geist', sans-serif" }}>AI DECISION</div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: '#F5F7F2', fontFamily: "'Geist', sans-serif" }}>AUTO → HIGH SPEED</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Scroll indicator */}
-        <div style={S.scrollIndicator}>
-          <div style={S.scrollDot} />
-          <span style={{ fontSize: 11, color: '#8B9298', fontFamily: "'Geist', sans-serif" }}>Scroll to explore</span>
-        </div>
       </section>
-
-      {/* ══════════════ STATS BAND ══════════════ */}
-      <Section>
-        <div style={S.statsBand}>
-          {[
-            { val: 60,   suffix: ' min', lbl: 'AI Prediction Horizon',    isCount: true },
-            { val: '4',  suffix: '',     lbl: 'Intelligent Pump Modes',    isCount: false },
-            { val: '1M', suffix: '+',    lbl: 'Free Weather API Calls/mo', isCount: false },
-            { val: '24', suffix: '/7',   lbl: 'Realtime Monitoring',       isCount: true },
-          ].map((s, i) => (
-            <div key={i} style={S.statItem}>
-              <div style={S.statVal}>
-                {s.isCount ? <><CountUp target={Number(s.val)} />{s.suffix}</> : `${s.val}${s.suffix}`}
-              </div>
-              <div style={S.statLbl}>{s.lbl}</div>
-            </div>
-          ))}
-        </div>
-      </Section>
 
       {/* ══════════════ HOW IT WORKS ══════════════ */}
       <Section id="how">
@@ -379,10 +434,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGetStarted,
               { ico: '⚙️', n: 3, title: 'Intelligent Decision', desc: 'Based on risk level (LOW/MEDIUM/HIGH/CRITICAL), the AI selects the optimal pump mode automatically.', color: '#F59E0B' },
               { ico: '💧', n: 4, title: 'Automated Control', desc: 'ESP32 hardware receives the pump command and executes it in real time. Every action is logged to Supabase.', color: '#A78BFA' },
             ].map((step, i) => (
-              <div key={step.n} style={{
-                ...S.stepCard,
-                animationDelay: `${i * 0.1}s`,
-              }}>
+              <div key={step.n} style={{ ...S.stepCard, animationDelay: `${i * 0.1}s` }}>
                 <div style={{ ...S.stepIconWrap, background: `${step.color}12`, border: `1px solid ${step.color}25` }}>
                   <span style={{ fontSize: 28 }}>{step.ico}</span>
                   <div style={{ ...S.stepNum, color: step.color, borderColor: `${step.color}30` }}>{step.n}</div>
@@ -524,7 +576,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGetStarted,
       <footer style={S.footer}>
         <div style={S.footerInner}>
           <div style={S.footerTop}>
-            {/* Brand */}
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                 <div style={S.navLogoMark}>
@@ -535,14 +586,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGetStarted,
                 <span style={{ fontSize: 18, fontWeight: 800, color: '#F5F7F2', fontFamily: "'Outfit', sans-serif" }}>RAPID</span>
               </div>
               <p style={{ fontSize: 12, color: '#8B9298', lineHeight: 1.6, maxWidth: 200, fontFamily: "'Geist', sans-serif" }}>
-                Rainfall Analysis & Pump Intelligence for Dewatering. SIH 2026.
+                Rainfall Analysis &amp; Pump Intelligence for Dewatering. SIH 2026.
               </p>
             </div>
-            {/* Links */}
             <div>
               <div style={S.footerHead}>Quick Links</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {[['How It Works', 'how'], ['Features', 'features'], ['Pump Modes', 'modes'], ['Technology', 'tech']].map(([l, id]) => (
+                {[['Platform', 'how'], ['Scientific Data', 'features'], ['Risk Simulator', 'modes'], ['Hardware', 'tech']].map(([l, id]) => (
                   <button key={id} onClick={() => scrollTo(id)} style={S.footerLink}>{l}</button>
                 ))}
               </div>
@@ -565,7 +615,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGetStarted,
             </div>
           </div>
           <div style={S.footerBottom}>
-            <span>© 2026 RAPID – Rainfall Analysis & Pump Intelligence for Dewatering. All rights reserved.</span>
+            <span>© 2026 RAPID – Rainfall Analysis &amp; Pump Intelligence for Dewatering. All rights reserved.</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#B7F34A', boxShadow: '0 0 6px #B7F34A' }} />
               <span style={{ color: '#B7F34A' }}>All Systems Operational</span>
@@ -576,23 +626,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onGetStarted,
 
       {/* ── Keyframe style tag ── */}
       <style>{`
-        @keyframes rainFall {
-          0%   { transform: translateY(-20px); opacity: 0; }
-          10%  { opacity: 1; }
-          90%  { opacity: 1; }
-          100% { transform: translateY(100vh); opacity: 0; }
-        }
-        @keyframes floatY {
-          0%, 100% { transform: translateY(0px); }
-          50%       { transform: translateY(-8px); }
-        }
         @keyframes pulseDot {
           0%, 100% { opacity: 1; transform: scale(1); }
           50%       { opacity: 0.5; transform: scale(0.85); }
-        }
-        @keyframes scrollBounce {
-          0%, 100% { transform: translateY(0); }
-          50%       { transform: translateY(6px); }
         }
       `}</style>
     </div>
@@ -605,70 +641,86 @@ const sectionBase: React.CSSProperties = {
 };
 
 const S: Record<string, React.CSSProperties> = {
-  root: { background: '#111416', minHeight: '100vh', fontFamily: "'Geist', 'Inter', sans-serif", overflowX: 'hidden' },
+  root: { background: '#0B0D0F', minHeight: '100vh', fontFamily: "'Geist', 'Inter', sans-serif", overflowX: 'hidden' },
 
   // Navbar
   nav: { position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, transition: 'all 0.3s ease', padding: '0 24px' },
-  navInner: { maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 },
+  navInner: { maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 60 },
   navLogo: { display: 'flex', alignItems: 'center', gap: 8 },
   navLogoMark: { width: 26, height: 26, background: '#B7F34A', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  navLogoText: { fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: 20, color: '#F5F7F2', letterSpacing: '-0.02em' },
+  navLogoText: { fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: 18, color: '#F5F7F2', letterSpacing: '-0.02em' },
   navLinks: { display: 'flex', listStyle: 'none', margin: 0, padding: 0, gap: 4 },
   navLink: { background: 'none', border: 'none', color: '#8B9298', fontSize: 14, cursor: 'pointer', padding: '8px 14px', borderRadius: 8, fontFamily: "'Geist', sans-serif", transition: 'color 0.2s, background 0.2s' },
-  navActions: { display: 'flex', gap: 10, alignItems: 'center' },
-  primaryBtn: { background: '#B7F34A', color: '#0B0D0F', border: 'none', borderRadius: 8, padding: '9px 18px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: "'Geist', sans-serif", transition: 'opacity 0.2s, transform 0.15s' },
-  ghostBtn: { background: 'transparent', color: '#F5F7F2', border: '1px solid #22252A', borderRadius: 8, padding: '9px 18px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: "'Geist', sans-serif", transition: 'border-color 0.2s' },
+  navActions: { display: 'flex', gap: 12, alignItems: 'center' },
+
+  // SYS chip
+  sysChip: { display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(183,243,74,0.08)', border: '1px solid rgba(183,243,74,0.2)', borderRadius: 100, padding: '5px 12px', color: '#B7F34A' },
+  sysDot: { width: 7, height: 7, borderRadius: '50%', background: '#B7F34A', boxShadow: '0 0 6px #B7F34A', animation: 'pulseDot 2s ease infinite', flexShrink: 0 },
+
+  // Request Access button
+  requestBtn: { background: 'transparent', color: '#F5F7F2', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, padding: '8px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: "'Geist', sans-serif", transition: 'all 0.2s' },
 
   // Hero
-  hero: { minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', overflow: 'hidden', paddingTop: 64 },
+  hero: { minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', overflow: 'hidden', paddingTop: 60 },
   heroBg: { position: 'absolute', inset: 0, zIndex: 0 },
-  glow: { position: 'absolute', borderRadius: '50%', filter: 'blur(100px)', pointerEvents: 'none' },
-  glowLime: { width: 400, height: 400, background: '#B7F34A', opacity: 0.08, top: '-10%', left: '5%' },
-  glowCyan: { width: 300, height: 300, background: '#63D9FF', opacity: 0.07, top: '20%', right: '10%' },
-  glowPurple: { width: 250, height: 250, background: '#A78BFA', opacity: 0.06, bottom: '5%', left: '30%' },
-  heroGrid: { position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '60px 60px' },
-  rainContainer: { position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' },
-  heroInner: { maxWidth: 1200, margin: '0 auto', padding: '0 24px', width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 60, alignItems: 'center', position: 'relative', zIndex: 1 },
-  heroLeft: { display: 'flex', flexDirection: 'column', gap: 28 },
-  badge: { display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(183,243,74,0.1)', border: '1px solid rgba(183,243,74,0.25)', borderRadius: 100, padding: '6px 14px', fontSize: 12, color: '#B7F34A', fontFamily: "'Geist', sans-serif", fontWeight: 600, width: 'fit-content' },
-  badgeDot: { width: 7, height: 7, borderRadius: '50%', background: '#B7F34A', boxShadow: '0 0 8px #B7F34A', animation: 'pulseDot 2s ease infinite' },
-  heroH1: { fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: 58, color: '#F5F7F2', lineHeight: 1.05, margin: 0, letterSpacing: '-0.03em' },
-  heroCopy: { fontSize: 17, color: '#8B9298', lineHeight: 1.7, margin: 0, fontFamily: "'Geist', sans-serif" },
-  heroCtas: { display: 'flex', gap: 14, flexWrap: 'wrap' },
-  ctaPrimary: { background: '#B7F34A', color: '#0B0D0F', border: 'none', borderRadius: 10, padding: '14px 28px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: "'Geist', sans-serif", transition: 'opacity 0.2s, transform 0.15s', boxShadow: '0 0 30px rgba(183,243,74,0.25)' },
-  ctaOutline: { background: 'transparent', color: '#F5F7F2', border: '1px solid #22252A', borderRadius: 10, padding: '14px 28px', fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: "'Geist', sans-serif", transition: 'border-color 0.2s' },
-  heroStats: { display: 'flex', gap: 32 },
-  heroStat: { display: 'flex', flexDirection: 'column', gap: 2 },
-  heroStatVal: { fontFamily: "'Geist Mono', monospace", fontWeight: 700, fontSize: 22, color: '#F5F7F2' },
-  heroStatLbl: { fontSize: 11, color: '#8B9298', fontFamily: "'Geist', sans-serif", letterSpacing: '0.05em' },
-  heroRight: { position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  glow: { position: 'absolute', borderRadius: '50%', filter: 'blur(120px)', pointerEvents: 'none' },
+  glowLime: { width: 500, height: 500, background: '#B7F34A', opacity: 0.05, top: '-15%', left: '0%' },
+  glowCyan: { width: 400, height: 400, background: '#00e5c4', opacity: 0.04, top: '10%', right: '5%' },
+  heroGrid: { position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)', backgroundSize: '60px 60px' },
 
-  // Float cards
-  floatCard: { position: 'absolute', zIndex: 10, animation: 'floatY 3s ease-in-out infinite' },
-  floatBadge: { background: 'rgba(21,24,27,0.95)', backdropFilter: 'blur(12px)', border: '1px solid #22252A', borderRadius: 10, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 8px 32px rgba(0,0,0,0.5)' },
-  floatDot: { width: 8, height: 8, borderRadius: '50%', flexShrink: 0, animation: 'pulseDot 1.5s ease infinite' },
+  heroInner: {
+    maxWidth: 1200, margin: '0 auto', padding: '0 24px', width: '100%',
+    display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: 48, alignItems: 'center',
+    position: 'relative', zIndex: 1,
+  },
+  heroLeft: { display: 'flex', flexDirection: 'column', gap: 24 },
 
-  // Dashboard card
-  dashCard: { background: '#15181B', border: '1px solid #22252A', borderRadius: 16, padding: 24, width: '100%', maxWidth: 420, boxShadow: '0 24px 80px rgba(0,0,0,0.6)', display: 'flex', flexDirection: 'column', gap: 16 },
-  dashCardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  logoMarkSmall: { width: 22, height: 22, background: '#B7F34A', borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  liveBadge: { display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: '#B7F34A', fontFamily: "'Geist', sans-serif", fontWeight: 700 },
-  liveDot: { width: 6, height: 6, borderRadius: '50%', background: '#B7F34A', boxShadow: '0 0 6px #B7F34A', animation: 'pulseDot 1.2s ease infinite' },
-  dashMetrics: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 },
-  dashMetric: { background: '#0B0D0F', borderRadius: 8, padding: 12, display: 'flex', flexDirection: 'column', gap: 4 },
-  pumpRow: { background: '#0B0D0F', borderRadius: 8, padding: 12 },
-  aiRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(183,243,74,0.06)', border: '1px solid rgba(183,243,74,0.15)', borderRadius: 8, padding: '10px 14px' },
-  aiTag: { fontSize: 11, fontFamily: "'Geist', sans-serif", fontWeight: 700, color: '#B7F34A', letterSpacing: '0.06em' },
+  // Badge
+  badge: { display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(183,243,74,0.08)', border: '1px solid rgba(183,243,74,0.2)', borderRadius: 100, padding: '6px 14px', fontSize: 11, color: '#B7F34A', fontFamily: "'Geist', sans-serif", fontWeight: 700, width: 'fit-content', letterSpacing: '0.05em' },
+  badgeDot: { width: 7, height: 7, borderRadius: '50%', background: '#B7F34A', boxShadow: '0 0 8px #B7F34A', animation: 'pulseDot 2s ease infinite', flexShrink: 0 },
 
-  // Scroll indicator
-  scrollIndicator: { position: 'absolute', bottom: 32, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, zIndex: 1 },
-  scrollDot: { width: 20, height: 32, border: '2px solid #22252A', borderRadius: 12, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 3 },
+  // Hero text
+  heroH1: { fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: 60, color: '#F5F7F2', lineHeight: 1.05, margin: 0, letterSpacing: '-0.03em' },
+  heroCopy: { fontSize: 16, color: '#8B9298', lineHeight: 1.7, margin: 0, fontFamily: "'Geist', sans-serif", maxWidth: 420 },
+  heroCtas: { display: 'flex', gap: 12, flexWrap: 'wrap' },
+  ctaPrimary: { background: '#B7F34A', color: '#0B0D0F', border: 'none', borderRadius: 8, padding: '12px 28px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: "'Geist', sans-serif", transition: 'opacity 0.2s, transform 0.15s' },
+  ctaOutline: { background: 'transparent', color: '#F5F7F2', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '12px 28px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: "'Geist', sans-serif", transition: 'border-color 0.2s' },
+  stationLine: { display: 'flex', alignItems: 'center', gap: 8 },
+  stationDot: { width: 7, height: 7, borderRadius: '50%', background: '#B7F34A', boxShadow: '0 0 6px #B7F34A', flexShrink: 0 },
 
-  // Stats band
-  statsBand: { maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 40, textAlign: 'center' },
-  statItem: { display: 'flex', flexDirection: 'column', gap: 6 },
-  statVal: { fontFamily: "'Geist Mono', monospace", fontWeight: 700, fontSize: 36, color: '#B7F34A', letterSpacing: '-0.02em' },
-  statLbl: { fontSize: 13, color: '#8B9298', fontFamily: "'Geist', sans-serif" },
+  // Hero right
+  heroRight: { display: 'flex', gap: 12, alignItems: 'stretch', height: 320 },
+  topoWrap: {
+    flex: 1, borderRadius: 12, overflow: 'hidden',
+    border: '1px solid rgba(0,229,196,0.2)',
+    boxShadow: '0 0 40px rgba(0,229,196,0.06)',
+  },
+  metricSidebar: { width: 160, display: 'flex', flexDirection: 'column', gap: 8 },
+  metricCard: {
+    background: '#10181A',
+    border: '1px solid #1C2828',
+    borderRadius: 10,
+    padding: '12px 14px',
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 4,
+  },
+  metricRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  metricLabel: { fontSize: 9, color: '#8B9298', fontFamily: "'Geist', sans-serif", fontWeight: 700, letterSpacing: '0.08em' },
+  metricBadge: { fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 10, fontFamily: "'Geist', sans-serif" },
+  metricVal: { display: 'flex', alignItems: 'baseline' },
+  metricTrend: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 },
+  metricTrendLabel: { fontSize: 9, color: '#8B9298', fontFamily: "'Geist', sans-serif" },
+
+  // Partner strip
+  partnerStrip: {
+    borderTop: '1px solid #1a1e22', borderBottom: '1px solid #1a1e22',
+    padding: '20px 48px', display: 'flex', alignItems: 'center', gap: 40, flexWrap: 'wrap',
+    background: '#0B0D0F',
+  },
+  partnerLabel: { fontSize: 10, color: '#8B9298', fontFamily: "'Geist', sans-serif", fontWeight: 700, letterSpacing: '0.12em', flexShrink: 0 },
+  partnerName:  { fontSize: 15, color: '#4A5158', fontFamily: "'Outfit', sans-serif", fontWeight: 700, letterSpacing: '-0.01em' },
 
   // Section commons
   secInner: { maxWidth: 1100, margin: '0 auto' },
@@ -680,12 +732,12 @@ const S: Record<string, React.CSSProperties> = {
   stepsGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, position: 'relative' },
   stepCard: { display: 'flex', flexDirection: 'column', gap: 12, position: 'relative' },
   stepIconWrap: { width: 64, height: 64, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', marginBottom: 4 },
-  stepNum: { position: 'absolute', top: -8, right: -8, width: 22, height: 22, borderRadius: '50%', border: '1px solid', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#111416', fontFamily: "'Geist', sans-serif" },
+  stepNum: { position: 'absolute', top: -8, right: -8, width: 22, height: 22, borderRadius: '50%', border: '1px solid', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0B0D0F', fontFamily: "'Geist', sans-serif" },
   stepTitle: { fontSize: 16, fontWeight: 700, fontFamily: "'Geist', sans-serif" },
   stepDesc: { fontSize: 13, color: '#8B9298', lineHeight: 1.6, fontFamily: "'Geist', sans-serif" },
   stepConnector: { position: 'absolute', top: 32, left: '100%', width: 24, height: 1, background: 'linear-gradient(90deg, #22252A, transparent)' },
 
-  // Features grid
+  // Features
   featsGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 },
   featCard: { background: '#15181B', border: '1px solid #22252A', borderRadius: 14, padding: '24px', display: 'flex', flexDirection: 'column', gap: 12, transition: 'border-color 0.2s, transform 0.2s, box-shadow 0.2s' },
   featIco: { width: 44, height: 44, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' },
@@ -701,7 +753,7 @@ const S: Record<string, React.CSSProperties> = {
   techGrid: { display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 16 },
   techCard: { background: '#15181B', border: '1px solid', borderRadius: 12, padding: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s' },
 
-  // CTA section
+  // CTA
   ctaSection: { maxWidth: 900, margin: '0 auto', position: 'relative', background: 'rgba(183,243,74,0.04)', border: '1px solid rgba(183,243,74,0.12)', borderRadius: 24, padding: '64px 48px', overflow: 'hidden', textAlign: 'center' },
   ctaGlow: { position: 'absolute', top: -80, left: '50%', transform: 'translateX(-50%)', width: 300, height: 300, background: '#B7F34A', borderRadius: '50%', filter: 'blur(80px)', opacity: 0.08, pointerEvents: 'none' },
   contactCard: { display: 'flex', alignItems: 'center', gap: 12, background: '#15181B', border: '1px solid #22252A', borderRadius: 12, padding: '14px 20px', textDecoration: 'none', color: 'inherit', transition: 'border-color 0.2s, background 0.2s' },

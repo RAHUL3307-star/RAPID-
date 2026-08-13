@@ -6,6 +6,10 @@ import { DemoMode }     from './pages/DemoMode';
 import { Settings }     from './pages/Settings';
 import { LandingPage }  from './pages/LandingPage';
 import { LoginPage }    from './pages/LoginPage';
+import { WeatherPage }  from './pages/WeatherPage';
+import { PumpControl }  from './pages/PumpControl';
+import { SolarEnergy }  from './pages/SolarEnergy';
+import { AlertsPage }   from './pages/AlertsPage';
 import { useAlerts }    from './hooks/useAlerts';
 import { useSensorData } from './hooks/useSensorData';
 import { usePredictions } from './hooks/usePredictions';
@@ -13,13 +17,17 @@ import { useAuth }      from './hooks/useAuth';
 import { isDemoMode }   from './lib/supabaseClient';
 
 type View    = 'landing' | 'login' | 'app';
-type AppPage = 'dashboard' | 'analytics' | 'demo' | 'settings';
+type AppPage = 'dashboard' | 'analytics' | 'demo' | 'settings' | 'weather' | 'pump' | 'solar' | 'alerts';
 
 const PAGE_TITLES: Record<AppPage, { title: string; subtitle: string }> = {
   dashboard: { title: 'RAPID — Operations Dashboard', subtitle: 'Rainfall Analysis & Pump Intelligence for Dewatering · Real-time telemetry · AI prediction' },
   analytics:  { title: 'Analytics & History',          subtitle: 'Historical trends and energy analysis' },
-  demo:       { title: 'Demo Mode',                     subtitle: 'Simulate heavy rainfall scenario for judges' },
-  settings:   { title: 'System Settings',               subtitle: 'Configure API keys and alert thresholds' },
+  demo:       { title: 'Live Monitoring',               subtitle: 'Real-time flood simulation and monitoring' },
+  weather:    { title: 'Weather Intelligence',          subtitle: 'Live rainfall forecast and mine flood risk assessment' },
+  pump:       { title: 'Pump Control',                  subtitle: 'Manual override & AI-automated pump management' },
+  solar:      { title: 'Solar & Battery Grid',          subtitle: 'Energy monitoring and runtime estimation' },
+  alerts:     { title: 'Active Alerts',                 subtitle: 'Real-time hardware & sensor alert center' },
+  settings:   { title: 'System Settings',               subtitle: 'Configure API keys, hardware connection and thresholds' },
 };
 
 function AppShell({ user, signOut }: { user: NonNullable<ReturnType<typeof useAuth>['user']>; signOut: () => void }) {
@@ -44,6 +52,10 @@ function AppShell({ user, signOut }: { user: NonNullable<ReturnType<typeof useAu
       case 'dashboard': return <Dashboard />;
       case 'analytics':  return <Analytics />;
       case 'demo':       return <DemoMode />;
+      case 'weather':    return <WeatherPage />;
+      case 'pump':       return <PumpControl />;
+      case 'solar':      return <SolarEnergy />;
+      case 'alerts':     return <AlertsPage />;
       case 'settings':   return <Settings />;
     }
   };
@@ -96,10 +108,10 @@ function AppShell({ user, signOut }: { user: NonNullable<ReturnType<typeof useAu
             <button
               className="alert-bell"
               id="alert-bell-btn"
-              onClick={() => setPage('dashboard')}
+              onClick={() => setPage('alerts')}
               aria-label={`${unacknowledged} unacknowledged alerts`}
             >
-              <span style={{ fontSize: 16 }}>Alerts</span>
+              <span style={{ fontSize: 16 }}>🔔</span>
               {unacknowledged > 0 && (
                 <span className="alert-count">{unacknowledged}</span>
               )}
@@ -117,8 +129,6 @@ export default function App() {
   const { user, loading, signOut } = useAuth();
   const [view, setView] = useState<View>('landing');
 
-  // Sync view with auth state changes (login/logout)
-  // This now reliably fires because user comes from shared AuthContext
   useEffect(() => {
     if (loading) return;
     if (user) {
@@ -162,7 +172,6 @@ export default function App() {
     );
   }
 
-  // Guard: if somehow in 'app' view but user is null (race condition), show loader
   if (!user) {
     return (
       <div style={{

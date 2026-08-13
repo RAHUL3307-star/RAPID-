@@ -15,7 +15,7 @@ export interface WeatherData {
 
 export async function fetchWeatherData(
   apiKey?: string,
-  location: string = 'Kolkata'
+  location: string = 'Chennai, Tamil Nadu, India'
 ): Promise<WeatherData | null> {
   const key = apiKey || import.meta.env.VITE_WEATHER_API_KEY;
 
